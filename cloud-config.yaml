@@ -1,0 +1,11 @@
+write_files:
+  - path: /run/scripts/provision-base.sh
+    content: |
+      #!/bin/bash
+      iptables -P FORWARD ACCEPT
+      apt update -y
+      apt install -y build-essential
+      EOF
+    permissions: '0755'
+runcmd:
+  - [ sh, "/run/scripts/provision-base.sh" ]
