@@ -4,7 +4,7 @@ $(info $(_InputFile) running under $(_System).)
 
 
 PREFIX        = gsf
-ARCH          := $(shell uname -m)   
+ARCH          := $(shell uname -m)
 TGT           = lib$(PREFIX)-$(ARCH).so
 STATIC_TGT    = lib$(PREFIX)-$(ARCH).a
 CFLAGS        = $(MACROS) -fPIC -Wall -D_STRICT_ANSI -D_LARGEFILE64_SOURCE
