@@ -1843,8 +1843,8 @@ typedef struct t_gsfSwathBathyPing
     double            *sonar_horz_uncert;  /* horizontal uncertainty provided by the sonar (Added in KMALL) */
     double            *detection_window;   /* Length of the detection window in seconds provided by the sonar (Added in KMALL) */
     double            *mean_abs_coeff;     /* Mean absolute coefficient provided by the sonar (Added in KMALL) */
-    int                sensor_id;          /* a definition which specifies the sensor */
-    gsfSensorSpecific  sensor_data;        /* union of known sensor specific data */
+    int               sensor_id;          /* a definition which specifies the sensor */
+    gsfSensorSpecific sensor_data;        /* union of known sensor specific data */
     gsfBRBIntensity   *brb_inten;          /* Structure containing bathymetric receive beam time series intensities */
 }
 gsfSwathBathyPing;
