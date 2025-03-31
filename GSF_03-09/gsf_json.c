@@ -69,6 +69,23 @@ void gsfBRBIntensity_toJson(cJSON *json, gsfBRBIntensity *brb) {
         printf("BRB = %s\n", json_str);
     }
 }
+
+void gsfEchotracSpecific_toJson(cJSON *json, t_gsfEchotracSpecific sensor_data) {
+    cJSON *sensor_json = cJSON_AddObjectToObject(json, "gsfEchotracSpecific");
+    cJSON_AddNumberToObject(sensor_json, "navigation_error", (int) sensor_data.navigation_error);
+    cJSON_AddNumberToObject(sensor_json, "mpp_source", (int) sensor_data.mpp_source);
+    cJSON_AddNumberToObject(sensor_json, "tide_source", (int) sensor_data.tide_source);
+}
+
+void gsfSBSensorSpecific_toJson(cJSON *json, gsfSBSensorSpecific sensor_data) {
+    cJSON *sensor_json = cJSON_AddObjectToObject(json, "gsfSBSensorSpecific");
+    gsfEchotracSpecific_toJson(sensor_json, sensor_data.gsfEchotracSpecific);
+    // t_gsfEchotracSpecific    gsfBathy2000Specific;
+    // t_gsfMGD77Specific       gsfMGD77Specific;
+    // t_gsfBDBSpecific         gsfBDBSpecific;
+    // t_gsfNOSHDBSpecific      gsfNOSHDBSpecific;
+}
+
 void gsfSBAmpSpecific_toJson(cJSON *json, t_gsfSBAmpSpecific sensor_data) {
     cJSON *sensor_json = cJSON_AddObjectToObject(json, "gsfSBAmpSpecific");
     cJSON_AddNumberToObject(sensor_json, "hour", (int) sensor_data.hour);
@@ -79,16 +96,12 @@ void gsfSBAmpSpecific_toJson(cJSON *json, t_gsfSBAmpSpecific sensor_data) {
     cJSON_AddNumberToObject(sensor_json, "avg_gate_depth", (int) sensor_data.avg_gate_depth);
 }
 
-void gsfEchotracSpecific_toJson(cJSON *json, t_gsfEchotracSpecific sensor_data) {
-    cJSON *sensor_json = cJSON_AddObjectToObject(json, "gsfEchotracSpecific");
-    cJSON_AddNumberToObject(sensor_json, "navigation_error", (int) sensor_data.navigation_error);
-    cJSON_AddNumberToObject(sensor_json, "mpp_source", (int) sensor_data.mpp_source);
-    cJSON_AddNumberToObject(sensor_json, "tide_source", (int) sensor_data.tide_source);
-}
 
 void gsfSeaBeamSpecific_toJson(cJSON *json, t_gsfSeaBeamSpecific sensor_data) {
     cJSON *sensor_json = cJSON_AddObjectToObject(json, "gsfSeaBeamSpecific");
     cJSON_AddNumberToObject(sensor_json, "EclipseTime", (int) sensor_data.EclipseTime);
+    // char *json_str = cJSON_PrintUnformatted(json); 
+    // printf("cJSON = %s\n", json_str);
 }
 
 void gsfEM100Specific_toJson(cJSON *json, t_gsfEM100Specific sensor_data) {
@@ -101,20 +114,69 @@ void gsfEM100Specific_toJson(cJSON *json, t_gsfEM100Specific sensor_data) {
     cJSON_AddNumberToObject(sensor_json, "tvg", sensor_data.tvg);
     cJSON_AddNumberToObject(sensor_json, "pulse_length", sensor_data.pulse_length);
     cJSON_AddNumberToObject(sensor_json, "counter", sensor_data.counter);
+    // char *json_str = cJSON_PrintUnformatted(json); 
+    // printf("cJSON = %s\n", json_str);
 }
 
-void gsfSBSensorSpecific_toJson(cJSON *json, gsfSBSensorSpecific sensor_data) {
-    cJSON *sensor_json = cJSON_AddObjectToObject(json, "gsfSBSensorSpecific");
-    gsfEchotracSpecific_toJson(sensor_json, sensor_data.gsfEchotracSpecific);
-    // t_gsfEchotracSpecific    gsfBathy2000Specific;
-    // t_gsfMGD77Specific       gsfMGD77Specific;
-    // t_gsfBDBSpecific         gsfBDBSpecific;
-    // t_gsfNOSHDBSpecific      gsfNOSHDBSpecific;
+void gsfEM121ASpecific_toJson(cJSON *json, t_gsfEM121ASpecific sensor_data, const char *name) {
+    cJSON *sensor_json = cJSON_AddObjectToObject(json, name);
+    cJSON_AddNumberToObject(sensor_json, "ping_number", sensor_data.ping_number);
+    cJSON_AddNumberToObject(sensor_json, "mode", sensor_data.mode);
+    cJSON_AddNumberToObject(sensor_json, "valid_beams", sensor_data.valid_beams);
+    cJSON_AddNumberToObject(sensor_json, "pulse_length", sensor_data.pulse_length);
+    cJSON_AddNumberToObject(sensor_json, "beam_width", sensor_data.beam_width);
+    cJSON_AddNumberToObject(sensor_json, "tx_power", sensor_data.tx_power);
+    cJSON_AddNumberToObject(sensor_json, "tx_status", sensor_data.tx_status);
+    cJSON_AddNumberToObject(sensor_json, "rx_status", sensor_data.rx_status);
+    cJSON_AddNumberToObject(sensor_json, "surface_velocity", sensor_data.surface_velocity);
+}
+
+void gsfSeaBatSpecific_toJson(cJSON *json, t_gsfSeaBatSpecific sensor_data) {
+    cJSON *sensor_json = cJSON_AddObjectToObject(json, "gsfSeaBatSpecific");
+    cJSON_AddNumberToObject(sensor_json, "ping_number", sensor_data.ping_number);
+    cJSON_AddNumberToObject(sensor_json, "surface_velocity", sensor_data.surface_velocity);
+    cJSON_AddNumberToObject(sensor_json, "mode", sensor_data.mode);
+    cJSON_AddNumberToObject(sensor_json, "sonar_range", sensor_data.sonar_range);
+    cJSON_AddNumberToObject(sensor_json, "transmit_power", sensor_data.transmit_power);
+    cJSON_AddNumberToObject(sensor_json, "receive_gain", sensor_data.receive_gain);
+}
+
+void gsfEM950Specific_toJson(cJSON *json, t_gsfEM950Specific sensor_data, const char *name) {
+    cJSON *sensor_json = cJSON_AddObjectToObject(json, name);
+    cJSON_AddNumberToObject(sensor_json, "ping_number", sensor_data.ping_number);
+    cJSON_AddNumberToObject(sensor_json, "mode", sensor_data.mode);
+    cJSON_AddNumberToObject(sensor_json, "ping_quality", sensor_data.ping_quality);
+    cJSON_AddNumberToObject(sensor_json, "ship_pitch", sensor_data.ship_pitch);
+    cJSON_AddNumberToObject(sensor_json, "transducer_pitch", sensor_data.transducer_pitch);
+    cJSON_AddNumberToObject(sensor_json, "surface_velocity", sensor_data.surface_velocity);
+}
+
+void gsfSeamapSpecific_toJson(cJSON *json, t_gsfSeamapSpecific sensor_data) {
+    cJSON *sensor_json = cJSON_AddObjectToObject(json, "gsfSeamapSpecific");
+    add_double_array(sensor_json, "portTransmitter", sensor_data.portTransmitter, 2);
+    add_double_array(sensor_json, "stbdTransmitter", sensor_data.stbdTransmitter, 2);
+    cJSON_AddNumberToObject(sensor_json, "portGain", sensor_data.portGain);
+    cJSON_AddNumberToObject(sensor_json, "stbdGain", sensor_data.stbdGain);
+    cJSON_AddNumberToObject(sensor_json, "portPulseLength", sensor_data.portPulseLength);
+    cJSON_AddNumberToObject(sensor_json, "stbdPulseLength", sensor_data.stbdPulseLength);
+    cJSON_AddNumberToObject(sensor_json, "pressureDepth", sensor_data.pressureDepth);
+    cJSON_AddNumberToObject(sensor_json, "altitude", sensor_data.altitude);
+    cJSON_AddNumberToObject(sensor_json, "temperature", sensor_data.temperature);
 }
 
 void gsfSensorSpecific_toJson(cJSON *json, gsfSensorSpecific sensor_data) {
     cJSON *sensor_json = cJSON_AddObjectToObject(json, "sensor_data");
     gsfSBAmpSpecific_toJson(sensor_json, sensor_data.gsfSBAmpSpecific);
+    gsfSeaBeamSpecific_toJson(sensor_json, sensor_data.gsfSeaBeamSpecific);
+    gsfEM100Specific_toJson(sensor_json, sensor_data.gsfEM100Specific);
+    gsfEM121ASpecific_toJson(sensor_json, sensor_data.gsfEM121ASpecific, "gsfEM121ASpecific");
+    gsfEM121ASpecific_toJson(sensor_json, sensor_data.gsfEM121ASpecific, "gsfEM121Specific");
+    gsfSeaBatSpecific_toJson(sensor_json, sensor_data.gsfSeaBatSpecific);
+    gsfEM950Specific_toJson(sensor_json, sensor_data.gsfEM950Specific, "gsfEM950Specific");
+    gsfEM950Specific_toJson(sensor_json, sensor_data.gsfEM1000Specific, "gsfEM1000Specific");
+    gsfSeamapSpecific_toJson(sensor_json, sensor_data.gsfSeamapSpecific);
+    // char *json_str = cJSON_PrintUnformatted(sensor_json); 
+    // printf("cJSON = %s\n", json_str);
 }
 
 cJSON *gsfSingleBeamPing_toJson(struct t_gsfSingleBeamPing ping) {
@@ -133,8 +195,6 @@ cJSON *gsfSingleBeamPing_toJson(struct t_gsfSingleBeamPing ping) {
     cJSON_AddNumberToObject(json, "positioning_system_type", ping.positioning_system_type);
     cJSON_AddNumberToObject(json, "sensor_id", ping.sensor_id);
     gsfSBSensorSpecific_toJson(json, ping.sensor_data);
-    char *json_str = cJSON_PrintUnformatted(json); 
-    printf("ping = %s\n", json_str);
     return json;
 }
 
@@ -179,9 +239,9 @@ cJSON *gsfSwathBathyPing_toJson(struct t_gsfSwathBathyPing ping) {
     add_double_array(json, "vertical_error", ping.vertical_error, ping.number_beams);
     add_double_array(json, "horizontal_error", ping.horizontal_error, ping.number_beams);
     add_short_array(json, "sector_number", ping.sector_number, ping.number_beams);
-    // unsigned short    *detection_info;     /* Array of values that specify the method of bottom detection */
+    add_short_array(json, "detection_info", ping.detection_info, ping.number_beams);
     add_double_array(json, "incident_beam_adj", ping.incident_beam_adj, ping.number_beams);
-    // unsigned short    *system_cleaning;    /* Array of values that specify data cleaning information from the sensor system */
+    add_short_array(json, "system_cleaning", ping.system_cleaning, ping.number_beams);
     add_double_array(json, "doppler_corr", ping.doppler_corr, ping.number_beams);
     add_double_array(json, "sonar_vert_uncert", ping.sonar_vert_uncert, ping.number_beams);
     add_double_array(json, "sonar_horz_uncert", ping.sonar_horz_uncert, ping.number_beams);
@@ -190,10 +250,6 @@ cJSON *gsfSwathBathyPing_toJson(struct t_gsfSwathBathyPing ping) {
     cJSON_AddNumberToObject(json, "sensor_id", ping.sensor_id);
     gsfBRBIntensity_toJson(json, ping.brb_inten);
     gsfSensorSpecific_toJson(json, ping.sensor_data);
-    // gsfSensorSpecific  sensor_data;        /* union of known sensor specific data */
-    // gsfBRBIntensity   *brb_inten;          /* Structure containing bathymetric receive beam time series intensities */
-    // char *json_str = cJSON_PrintUnformatted(json); 
-    // printf("ping = %s\n", json_str);
     return json;
 }
 
