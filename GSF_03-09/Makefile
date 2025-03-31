@@ -23,7 +23,7 @@ LIBS          = -lwsock32
 .c.o:
 	$(CC) -c $(CFLAGS) $*.c -o$@
 
-OBJS = gsf.o gsf_enc.o gsf_dec.o gsf_indx.o gsf_info.o gsf_geo.o gsf_compress.o
+OBJS = gsf.o gsf_enc.o gsf_dec.o gsf_indx.o gsf_info.o gsf_geo.o gsf_json.o gsf_compress.o
 
 all : $(OBJS)
 	$(LINKER) $(LFLAGS) -o $(TGT) $(OBJS)
