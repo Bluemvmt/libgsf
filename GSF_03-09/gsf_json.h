@@ -5,4 +5,7 @@
 
 cJSON *gsfRecord_toJson(gsfDataID dataID, gsfRecords record);
 
+_libgsf.gsfClose.argtypes = [c_int]
+_libgsf.gsfClose.restype = c_int
+
 #endif
