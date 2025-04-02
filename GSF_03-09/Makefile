@@ -5,8 +5,9 @@ $(info $(_InputFile) running under $(_System).)
 
 PREFIX        = gsf
 ARCH          = $(shell uname -m)
-TGT           = lib$(PREFIX)-$(ARCH).so
-STATIC_TGT    = lib$(PREFIX).a
+VERSION       = 03.09
+TGT           = lib$(PREFIX)-$(ARCH)-$(VERSION).so
+STATIC_TGT    = lib$(PREFIX)-$(ARCH)-$(VERSION).a
 CFLAGS        = $(MACROS) -fPIC -Wall -D_STRICT_ANSI -D_LARGEFILE64_SOURCE
 CPPFLAGS      = $(CFLAGS)
 LFLAGS        = -shared $(LINK_FLAGS)
@@ -23,7 +24,7 @@ LIBS          = -lwsock32
 .c.o:
 	$(CC) -c $(CFLAGS) $*.c -o$@
 
-OBJS = gsf.o gsf_enc.o gsf_dec.o gsf_indx.o gsf_info.o gsf_geo.o gsf_json.o gsf_compress.o
+OBJS = gsf.o cJSON.o gsf_enc.o gsf_dec.o gsf_indx.o gsf_info.o gsf_geo.o gsf_json.o gsf_compress.o
 
 all : $(OBJS)
 	$(LINKER) $(LFLAGS) -o $(TGT) $(OBJS)

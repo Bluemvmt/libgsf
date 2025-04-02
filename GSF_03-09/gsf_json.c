@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <cjson/cJSON.h>
+#include "cJSON.h"
 #include "gsf_json.h"
 #include "gsf.h"
 
@@ -170,16 +170,16 @@ static void gsfCmpSassSpecific_toJson(cJSON *json, t_gsfCmpSassSpecific sensor_d
     cJSON_AddNumberToObject(sensor_json, "lntens", sensor_data.lntens);
 }
 
-static void gsfSeaBatIISpecific_toJson(cJSON *json, t_gsfSeaBatIISpecific sensor_data) {
-    int             ping_number;            /* 1 - 32767 */
-    double          surface_velocity;       /* meters/second */
-    int             mode;                   /* bit mapped, see macros below */
-    int             sonar_range;            /* meters */
-    int             transmit_power;
-    int             receive_gain;
-    double          fore_aft_bw;            /* fore/aft beam width in degrees */
-    double          athwart_bw;             /* athwartships beam width in degrees */
-}
+// static void gsfSeaBatIISpecific_toJson(cJSON *json, t_gsfSeaBatIISpecific sensor_data) {
+//     int             ping_number;            /* 1 - 32767 */
+//     double          surface_velocity;       /* meters/second */
+//     int             mode;                   /* bit mapped, see macros below */
+//     int             sonar_range;            /* meters */
+//     int             transmit_power;
+//     int             receive_gain;
+//     double          fore_aft_bw;            /* fore/aft beam width in degrees */
+//     double          athwart_bw;             /* athwartships beam width in degrees */
+// }
 
 static void gsfSensorSpecific_toJson(cJSON *json, gsfSensorSpecific sensor_data) {
     cJSON *sensor_json = cJSON_AddObjectToObject(json, "sensor_data");
@@ -266,7 +266,7 @@ static cJSON *gsfSwathBathyPing_toJson(struct t_gsfSwathBathyPing ping) {
     add_double_array(json, "detection_window", ping.detection_window, ping.number_beams);
     add_double_array(json, "mean_abs_coeff", ping.mean_abs_coeff, ping.number_beams);
     cJSON_AddNumberToObject(json, "sensor_id", ping.sensor_id);
-    //gsfBRBIntensity_toJson(json, ping.brb_inten);
+    gsfBRBIntensity_toJson(json, ping.brb_inten);
     gsfSensorSpecific_toJson(json, ping.sensor_data);
     return json;
 }
