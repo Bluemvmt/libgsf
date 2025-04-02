@@ -18,17 +18,18 @@ STATIC_LINKER = ar
 AR            = ar
 RM            = rm -f
 LIBS          = -lwsock32
+CJSON_OBJ     = ../cjson/cJSON.o
 
 .cpp.o:
 	$(CPP) -c $(CPPFLAGS) $*.cpp -o$@
 .c.o:
 	$(CC) -c $(CFLAGS) $*.c -o$@
 
-OBJS = gsf.o cJSON.o gsf_enc.o gsf_dec.o gsf_indx.o gsf_info.o gsf_geo.o gsf_json.o gsf_compress.o
+OBJS = gsf.o  gsf_enc.o gsf_dec.o gsf_indx.o gsf_info.o gsf_geo.o gsf_json.o gsf_compress.o 
 
 all : $(OBJS)
-	$(LINKER) $(LFLAGS) -o $(TGT) $(OBJS)
-	$(STATIC_LINKER) rcs $(STATIC_TGT) $(OBJS)
+	$(LINKER) $(LFLAGS) -o $(TGT) $(OBJS) $(CJSON_OBJ)
+	$(STATIC_LINKER) rcs $(STATIC_TGT) $(OBJS) $(CJSON_OBJ)
 
 clean:
 	$(RM) $(TGT) $(STATIC_TGT) $(OBJS) 

@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "cJSON.h"
+#include "../cjson/cJSON.h"
 #include "gsf_json.h"
 #include "gsf.h"
 
