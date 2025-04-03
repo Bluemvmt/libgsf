@@ -3296,6 +3296,15 @@ GSF_POSITION *gsfGetPositionDestination(GSF_POSITION gp, GSF_POSITION_OFFSETS of
 
 GSF_POSITION_OFFSETS *gsfGetPositionOffsets(GSF_POSITION gp_from, GSF_POSITION gp_to, double hdg, double dist_step);
 
+typedef struct t_gsfJsonRecord
+{
+    int lastReturnValue;
+    char *jsonRecord;
+}
+gsfJsonRecord;
+
+struct t_gsfJsonRecord gsfNextJsonRecord(int handle, int desired_record);
+
 #ifdef __cplusplus
 }
 #endif
