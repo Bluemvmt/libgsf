@@ -49,14 +49,16 @@ cJSON *gsfAttitude_toJson(struct t_gsfAttitude attitude) {
 
 cJSON *gsfSwathBathySummary_toJson(struct t_gsfSwathBathySummary summary) {
     cJSON *json = cJSON_CreateObject();
-    cJSON_AddNumberToObject(json, "start_time", epoch_double(summary.start_time));
-    cJSON_AddNumberToObject(json, "end_time", epoch_double(summary.end_time));
-    cJSON_AddNumberToObject(json, "min_latitude", summary.min_latitude);
-    cJSON_AddNumberToObject(json, "min_longitude", summary.min_longitude);
-    cJSON_AddNumberToObject(json, "max_latitude", summary.max_latitude);
-    cJSON_AddNumberToObject(json, "max_longitude", summary.max_longitude);
-    cJSON_AddNumberToObject(json, "max_depth", summary.min_depth);
-    cJSON_AddNumberToObject(json, "max_depth", summary.max_depth);
+    cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_SWATH_BATHY_SUMMARY);
+    cJSON *body_json = cJSON_AddObjectToObject(json, "summary");
+    cJSON_AddNumberToObject(body_json, "start_time", epoch_double(summary.start_time));
+    cJSON_AddNumberToObject(body_json, "end_time", epoch_double(summary.end_time));
+    cJSON_AddNumberToObject(body_json, "min_latitude", summary.min_latitude);
+    cJSON_AddNumberToObject(body_json, "min_longitude", summary.min_longitude);
+    cJSON_AddNumberToObject(body_json, "max_latitude", summary.max_latitude);
+    cJSON_AddNumberToObject(body_json, "max_longitude", summary.max_longitude);
+    cJSON_AddNumberToObject(body_json, "min_depth", summary.min_depth);
+    cJSON_AddNumberToObject(body_json, "max_depth", summary.max_depth);
     return json;
 }
 
@@ -199,81 +201,87 @@ static void gsfSensorSpecific_toJson(cJSON *json, gsfSensorSpecific sensor_data)
 
 static cJSON *gsfSingleBeamPing_toJson(struct t_gsfSingleBeamPing ping) {
     cJSON *json = cJSON_CreateObject();
-    cJSON_AddNumberToObject(json, "ping_time", epoch_double(ping.ping_time));
-    cJSON_AddNumberToObject(json, "latitude", ping.latitude);
-    cJSON_AddNumberToObject(json, "longitude", ping.longitude);
-    cJSON_AddNumberToObject(json, "tide_corrector", ping.tide_corrector);
-    cJSON_AddNumberToObject(json, "depth_corrector", ping.depth_corrector);
-    cJSON_AddNumberToObject(json, "heading", ping.heading);
-    cJSON_AddNumberToObject(json, "pitch", ping.pitch);
-    cJSON_AddNumberToObject(json, "roll", ping.roll);
-    cJSON_AddNumberToObject(json, "heave", ping.heave);
-    cJSON_AddNumberToObject(json, "depth", ping.depth);
-    cJSON_AddNumberToObject(json, "sound_speed_correction", ping.sound_speed_correction);
-    cJSON_AddNumberToObject(json, "positioning_system_type", ping.positioning_system_type);
-    cJSON_AddNumberToObject(json, "sensor_id", ping.sensor_id);
-    gsfSBSensorSpecific_toJson(json, ping.sensor_data);
+    cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_SINGLE_BEAM_PING);
+    cJSON *body_json = cJSON_AddObjectToObject(json, "sb_ping");
+    cJSON_AddNumberToObject(body_json, "ping_time", epoch_double(ping.ping_time));
+    cJSON_AddNumberToObject(body_json, "latitude", ping.latitude);
+    cJSON_AddNumberToObject(body_json, "longitude", ping.longitude);
+    cJSON_AddNumberToObject(body_json, "tide_corrector", ping.tide_corrector);
+    cJSON_AddNumberToObject(body_json, "depth_corrector", ping.depth_corrector);
+    cJSON_AddNumberToObject(body_json, "heading", ping.heading);
+    cJSON_AddNumberToObject(body_json, "pitch", ping.pitch);
+    cJSON_AddNumberToObject(body_json, "roll", ping.roll);
+    cJSON_AddNumberToObject(body_json, "heave", ping.heave);
+    cJSON_AddNumberToObject(body_json, "depth", ping.depth);
+    cJSON_AddNumberToObject(body_json, "sound_speed_correction", ping.sound_speed_correction);
+    cJSON_AddNumberToObject(body_json, "positioning_system_type", ping.positioning_system_type);
+    cJSON_AddNumberToObject(body_json, "sensor_id", ping.sensor_id);
+    gsfSBSensorSpecific_toJson(body_json, ping.sensor_data);
     return json;
 }
 
 static cJSON *gsfSwathBathyPing_toJson(struct t_gsfSwathBathyPing ping) {
     cJSON *json = cJSON_CreateObject();
+    cJSON *body_json = cJSON_AddObjectToObject(json, "mb_ping");
 
-    cJSON_AddNumberToObject(json, "ping_time", epoch_double(ping.ping_time));
-    cJSON_AddNumberToObject(json, "latitude", ping.latitude);
-    cJSON_AddNumberToObject(json, "longitude", ping.longitude);
-    cJSON_AddNumberToObject(json, "height", ping.height);  
-    cJSON_AddNumberToObject(json, "sep", ping.sep);
-    cJSON_AddNumberToObject(json, "number_beams", ping.number_beams);
-    cJSON_AddNumberToObject(json, "center_beam", ping.center_beam);
-    cJSON_AddNumberToObject(json, "ping_flags", ping.ping_flags);
-    cJSON_AddNumberToObject(json, "reserved", ping.reserved);  
-    cJSON_AddNumberToObject(json, "tide_corrector", ping.tide_corrector);
-    cJSON_AddNumberToObject(json, "gps_tide_corrector", ping.gps_tide_corrector);
-    cJSON_AddNumberToObject(json, "depth_corrector", ping.depth_corrector);
-    cJSON_AddNumberToObject(json, "heading", ping.heading);
-    cJSON_AddNumberToObject(json, "pitch", ping.pitch);
-    cJSON_AddNumberToObject(json, "roll", ping.roll);
-    cJSON_AddNumberToObject(json, "heave", ping.heave);
-    cJSON_AddNumberToObject(json, "course", ping.course);
-    cJSON_AddNumberToObject(json, "speed", ping.speed);
-    add_double_array(json, "depth", ping.depth, ping.number_beams);
-    add_double_array(json, "nominal_depth", ping.nominal_depth, ping.number_beams);
-    add_double_array(json, "across_track", ping.across_track, ping.number_beams);
-    add_double_array(json, "travel_time", ping.travel_time, ping.number_beams);
-    add_double_array(json, "beam_angle", ping.beam_angle, ping.number_beams);
-    add_double_array(json, "mc_amplitude", ping.mc_amplitude, ping.number_beams);
-    add_double_array(json, "mr_amplitude", ping.mr_amplitude, ping.number_beams);
-    add_double_array(json, "echo_width", ping.echo_width, ping.number_beams);
-    add_double_array(json, "quality_factor", ping.quality_factor, ping.number_beams);
-    add_double_array(json, "receive_heave", ping.receive_heave, ping.number_beams);
-    add_double_array(json, "depth_error", ping.depth_error, ping.number_beams);
-    add_double_array(json, "across_track_error", ping.across_track, ping.number_beams);
-    add_double_array(json, "along_track_error", ping.along_track_error, ping.number_beams);
-    add_char_array(json, "quality_flags", ping.quality_flags, ping.number_beams);
-    add_char_array(json, "beam_flags", ping.beam_flags, ping.number_beams);
-    add_double_array(json, "signal_to_noise", ping.signal_to_noise, ping.number_beams);
-    add_double_array(json, "beam_angle_forward", ping.beam_angle_forward, ping.number_beams);
-    add_double_array(json, "vertical_error", ping.vertical_error, ping.number_beams);
-    add_double_array(json, "horizontal_error", ping.horizontal_error, ping.number_beams);
-    add_short_array(json, "sector_number", ping.sector_number, ping.number_beams);
-    add_short_array(json, "detection_info", ping.detection_info, ping.number_beams);
-    add_double_array(json, "incident_beam_adj", ping.incident_beam_adj, ping.number_beams);
-    add_short_array(json, "system_cleaning", ping.system_cleaning, ping.number_beams);
-    add_double_array(json, "doppler_corr", ping.doppler_corr, ping.number_beams);
-    add_double_array(json, "sonar_vert_uncert", ping.sonar_vert_uncert, ping.number_beams);
-    add_double_array(json, "sonar_horz_uncert", ping.sonar_horz_uncert, ping.number_beams);
-    add_double_array(json, "detection_window", ping.detection_window, ping.number_beams);
-    add_double_array(json, "mean_abs_coeff", ping.mean_abs_coeff, ping.number_beams);
-    cJSON_AddNumberToObject(json, "sensor_id", ping.sensor_id);
-    gsfBRBIntensity_toJson(json, ping.brb_inten);
-    gsfSensorSpecific_toJson(json, ping.sensor_data);
+    cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_SWATH_BATHYMETRY_PING);
+    cJSON_AddNumberToObject(body_json, "ping_time", epoch_double(ping.ping_time));
+    cJSON_AddNumberToObject(body_json, "latitude", ping.latitude);
+    cJSON_AddNumberToObject(body_json, "longitude", ping.longitude);
+    cJSON_AddNumberToObject(body_json, "height", ping.height);  
+    cJSON_AddNumberToObject(body_json, "sep", ping.sep);
+    cJSON_AddNumberToObject(body_json, "number_beams", ping.number_beams);
+    cJSON_AddNumberToObject(body_json, "center_beam", ping.center_beam);
+    cJSON_AddNumberToObject(body_json, "ping_flags", ping.ping_flags);
+    cJSON_AddNumberToObject(body_json, "reserved", ping.reserved);  
+    cJSON_AddNumberToObject(body_json, "tide_corrector", ping.tide_corrector);
+    cJSON_AddNumberToObject(body_json, "gps_tide_corrector", ping.gps_tide_corrector);
+    cJSON_AddNumberToObject(body_json, "depth_corrector", ping.depth_corrector);
+    cJSON_AddNumberToObject(body_json, "heading", ping.heading);
+    cJSON_AddNumberToObject(body_json, "pitch", ping.pitch);
+    cJSON_AddNumberToObject(body_json, "roll", ping.roll);
+    cJSON_AddNumberToObject(body_json, "heave", ping.heave);
+    cJSON_AddNumberToObject(body_json, "course", ping.course);
+    cJSON_AddNumberToObject(body_json, "speed", ping.speed);
+    add_double_array(body_json, "depth", ping.depth, ping.number_beams);
+    add_double_array(body_json, "nominal_depth", ping.nominal_depth, ping.number_beams);
+    add_double_array(body_json, "across_track", ping.across_track, ping.number_beams);
+    add_double_array(body_json, "travel_time", ping.travel_time, ping.number_beams);
+    add_double_array(body_json, "beam_angle", ping.beam_angle, ping.number_beams);
+    add_double_array(body_json, "mc_amplitude", ping.mc_amplitude, ping.number_beams);
+    add_double_array(body_json, "mr_amplitude", ping.mr_amplitude, ping.number_beams);
+    add_double_array(body_json, "echo_width", ping.echo_width, ping.number_beams);
+    add_double_array(body_json, "quality_factor", ping.quality_factor, ping.number_beams);
+    add_double_array(body_json, "receive_heave", ping.receive_heave, ping.number_beams);
+    add_double_array(body_json, "depth_error", ping.depth_error, ping.number_beams);
+    add_double_array(body_json, "across_track_error", ping.across_track, ping.number_beams);
+    add_double_array(body_json, "along_track_error", ping.along_track_error, ping.number_beams);
+    add_char_array(body_json, "quality_flags", ping.quality_flags, ping.number_beams);
+    add_char_array(body_json, "beam_flags", ping.beam_flags, ping.number_beams);
+    add_double_array(body_json, "signal_to_noise", ping.signal_to_noise, ping.number_beams);
+    add_double_array(body_json, "beam_angle_forward", ping.beam_angle_forward, ping.number_beams);
+    add_double_array(body_json, "vertical_error", ping.vertical_error, ping.number_beams);
+    add_double_array(body_json, "horizontal_error", ping.horizontal_error, ping.number_beams);
+    add_short_array(body_json, "sector_number", ping.sector_number, ping.number_beams);
+    add_short_array(body_json, "detection_info", ping.detection_info, ping.number_beams);
+    add_double_array(body_json, "incident_beam_adj", ping.incident_beam_adj, ping.number_beams);
+    add_short_array(body_json, "system_cleaning", ping.system_cleaning, ping.number_beams);
+    add_double_array(body_json, "doppler_corr", ping.doppler_corr, ping.number_beams);
+    add_double_array(body_json, "sonar_vert_uncert", ping.sonar_vert_uncert, ping.number_beams);
+    add_double_array(body_json, "sonar_horz_uncert", ping.sonar_horz_uncert, ping.number_beams);
+    add_double_array(body_json, "detection_window", ping.detection_window, ping.number_beams);
+    add_double_array(body_json, "mean_abs_coeff", ping.mean_abs_coeff, ping.number_beams);
+    cJSON_AddNumberToObject(body_json, "sensor_id", ping.sensor_id);
+    gsfBRBIntensity_toJson(body_json, ping.brb_inten);
+    gsfSensorSpecific_toJson(body_json, ping.sensor_data);
     return json;
 }
 
 static cJSON *gsfHeader_toJson(struct t_gsfHeader header) {
     cJSON *json = cJSON_CreateObject();
-    cJSON_AddStringToObject(json, "header", header.version);
+    cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_HEADER);
+    cJSON *body_json = cJSON_AddObjectToObject(json, "header");
+    cJSON_AddStringToObject(body_json, "version", header.version);
     return json;
 }
 
@@ -296,4 +304,23 @@ char *gsfRecord_toJson(gsfDataID dataID, gsfRecords record) {
             return NULL;
     }
     return cJSON_PrintUnformatted(json); 
+}
+
+struct t_gsfJsonRecord gsfNextJsonRecord(int handle, int desired_record) {
+    gsfDataID gsfID;
+    gsfRecords gsfRec;
+    struct t_gsfJsonRecord nextRecord;
+
+    int bytes_read;
+    bytes_read = gsfRead(handle, desired_record, &gsfID, &gsfRec, NULL, 0);
+    printf("handle = %d, bytes_read_ctypes = %d\n", handle, bytes_read);
+    if (bytes_read <= 0) {
+        nextRecord.lastReturnValue = bytes_read;
+        nextRecord.jsonRecord = NULL;
+    } else {
+        nextRecord.lastReturnValue = bytes_read;
+        nextRecord.jsonRecord = gsfRecord_toJson(gsfID, gsfRec);
+    }
+
+    return nextRecord;
 }
