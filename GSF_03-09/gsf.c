@@ -9418,21 +9418,3 @@ gsfInitializeMBParams (gsfMBParams *p)
         p->applied.rx_transducer_heading_offset[i] = GSF_UNKNOWN_PARAM_VALUE;
     }
 }
-
-struct t_gsfJsonRecord gsfNextJsonRecord(int handle, int desired_record) {
-    gsfDataID gsfID;
-    gsfRecords gsfRec;
-    struct t_gsfJsonRecord nextRecord;
-
-    int bytes_read;
-    bytes_read = gsfRead(handle, desired_record, &gsfID, &gsfRec, NULL, 0);
-    if (bytes_read <= 0) {
-        nextRecord.lastReturnValue = bytes_read;
-        nextRecord.jsonRecord = NULL;
-    } else {
-        nextRecord.lastReturnValue = bytes_read;
-        nextRecord.jsonRecord = gsfRecord_toJson(gsfID, gsfRec);
-    }
-
-    return nextRecord;
-}
