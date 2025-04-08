@@ -163,6 +163,7 @@
 #include "gsf_enc.h"
 #include "gsf_dec.h"
 #include "gsf_indx.h"
+#include "gsf_json.h"
 
 /* Macros required for this module */
 #undef fseek
@@ -9141,4 +9142,3 @@ gsfInitializeMBParams (gsfMBParams *p)
         p->applied.rx_transducer_heading_offset[i] = GSF_UNKNOWN_PARAM_VALUE;
     }
 }
-
