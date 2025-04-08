@@ -67,8 +67,6 @@ static void gsfBRBIntensity_toJson(cJSON *json, gsfBRBIntensity *brb) {
         cJSON *brb_json = cJSON_AddObjectToObject(json, "brb_inten");
         cJSON_AddNumberToObject(brb_json, "bits_per_sample", (int) brb->bits_per_sample);
         cJSON_AddNumberToObject(brb_json, "applied_corrections", brb->applied_corrections);
-        char *json_str = cJSON_PrintUnformatted(brb_json); 
-        printf("BRB = %s\n", json_str);
     }
 }
 
@@ -102,8 +100,6 @@ static void gsfSBAmpSpecific_toJson(cJSON *json, t_gsfSBAmpSpecific sensor_data)
 static void gsfSeaBeamSpecific_toJson(cJSON *json, t_gsfSeaBeamSpecific sensor_data) {
     cJSON *sensor_json = cJSON_AddObjectToObject(json, "gsfSeaBeamSpecific");
     cJSON_AddNumberToObject(sensor_json, "EclipseTime", (int) sensor_data.EclipseTime);
-    // char *json_str = cJSON_PrintUnformatted(json); 
-    // printf("cJSON = %s\n", json_str);
 }
 
 static void gsfEM100Specific_toJson(cJSON *json, t_gsfEM100Specific sensor_data) {
@@ -116,8 +112,6 @@ static void gsfEM100Specific_toJson(cJSON *json, t_gsfEM100Specific sensor_data)
     cJSON_AddNumberToObject(sensor_json, "tvg", sensor_data.tvg);
     cJSON_AddNumberToObject(sensor_json, "pulse_length", sensor_data.pulse_length);
     cJSON_AddNumberToObject(sensor_json, "counter", sensor_data.counter);
-    // char *json_str = cJSON_PrintUnformatted(json); 
-    // printf("cJSON = %s\n", json_str);
 }
 
 static void gsfEM121ASpecific_toJson(cJSON *json, t_gsfEM121ASpecific sensor_data, const char *name) {
@@ -195,8 +189,6 @@ static void gsfSensorSpecific_toJson(cJSON *json, gsfSensorSpecific sensor_data)
     gsfEM950Specific_toJson(sensor_json, sensor_data.gsfEM1000Specific, "gsfEM1000Specific");
     gsfSeamapSpecific_toJson(sensor_json, sensor_data.gsfSeamapSpecific);
     gsfCmpSassSpecific_toJson(sensor_json, sensor_data.gsfCmpSassSpecific);
-    // char *json_str = cJSON_PrintUnformatted(sensor_json); 
-    // printf("cJSON = %s\n", json_str);
 }
 
 static cJSON *gsfSingleBeamPing_toJson(struct t_gsfSingleBeamPing ping) {
@@ -313,7 +305,6 @@ struct t_gsfJsonRecord gsfNextJsonRecord(int handle, int desired_record) {
 
     int bytes_read;
     bytes_read = gsfRead(handle, desired_record, &gsfID, &gsfRec, NULL, 0);
-    printf("handle = %d, bytes_read_ctypes = %d\n", handle, bytes_read);
     if (bytes_read <= 0) {
         nextRecord.lastReturnValue = bytes_read;
         nextRecord.jsonRecord = NULL;
