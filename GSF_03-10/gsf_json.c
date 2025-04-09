@@ -212,10 +212,17 @@ static cJSON *gsfSingleBeamPing_toJson(struct t_gsfSingleBeamPing ping) {
     return json;
 }
 
-static cJSON *gsfSwathBathyPing_toJson(struct t_gsfSwathBathyPing ping) {
+static cJSON *gsfSwathBathyPing_toJson(struct t_gsfSwathBathyPing ping, int include_druid_fields) {
     cJSON *json = cJSON_CreateObject();
     cJSON *body_json = cJSON_AddObjectToObject(json, "mb_ping");
 
+    double epoch_time = epoch_double(ping.ping_time);
+    if (include_druid_fields) {
+        cJSON_AddNumberToObject(json, "timestamp", epoch_time);
+        cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_SWATH_BATHYMETRY_PING);
+        cJSON_AddNumberToObject(json, "latitude", ping.latitude);
+        cJSON_AddNumberToObject(json, "longitude", ping.longitude);
+    }
     cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_SWATH_BATHYMETRY_PING);
     cJSON_AddNumberToObject(body_json, "ping_time", epoch_double(ping.ping_time));
     cJSON_AddNumberToObject(body_json, "latitude", ping.latitude);
@@ -277,7 +284,7 @@ static cJSON *gsfHeader_toJson(struct t_gsfHeader header) {
     return json;
 }
 
-char *gsfRecord_toJson(gsfDataID dataID, gsfRecords record) {
+char *gsfRecord_toJson(gsfDataID dataID, gsfRecords record, int include_druid_fields) {
     cJSON *json;
     switch (dataID.recordID) {
         case GSF_RECORD_HEADER:
@@ -287,7 +294,7 @@ char *gsfRecord_toJson(gsfDataID dataID, gsfRecords record) {
             json =  gsfSwathBathySummary_toJson(record.summary);
             break;
         case GSF_RECORD_SWATH_BATHYMETRY_PING:
-            json = gsfSwathBathyPing_toJson(record.mb_ping);
+            json = gsfSwathBathyPing_toJson(record.mb_ping, include_druid_fields);
             break;
         case GSF_RECORD_SINGLE_BEAM_PING:
             json = gsfSingleBeamPing_toJson(record.sb_ping);
@@ -298,7 +305,7 @@ char *gsfRecord_toJson(gsfDataID dataID, gsfRecords record) {
     return cJSON_PrintUnformatted(json); 
 }
 
-struct t_gsfJsonRecord gsfNextJsonRecord(int handle, int desired_record) {
+struct t_gsfJsonRecord gsfNextJsonRecord(int handle, int desired_record, int include_druid_fields) {
     gsfDataID gsfID;
     gsfRecords gsfRec;
     struct t_gsfJsonRecord nextRecord;
@@ -310,7 +317,7 @@ struct t_gsfJsonRecord gsfNextJsonRecord(int handle, int desired_record) {
         nextRecord.jsonRecord = NULL;
     } else {
         nextRecord.lastReturnValue = bytes_read;
-        nextRecord.jsonRecord = gsfRecord_toJson(gsfID, gsfRec);
+        nextRecord.jsonRecord = gsfRecord_toJson(gsfID, gsfRec, include_druid_fields);
     }
 
     return nextRecord;
