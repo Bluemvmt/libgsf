@@ -9,7 +9,7 @@ typedef struct t_gsfJsonRecord
 }
 gsfJsonRecord;
 
-char *gsfRecord_toJson(gsfDataID dataID, gsfRecords record);
-struct t_gsfJsonRecord gsfNextJsonRecord(int handle, int desired_record);
+char *gsfRecord_toJson(gsfDataID dataID, gsfRecords record, int include_druid_fields);
+struct t_gsfJsonRecord gsfNextJsonRecord(int handle, int desired_record, int include_druid_fields);
 
 #endif

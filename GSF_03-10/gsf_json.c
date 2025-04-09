@@ -67,8 +67,6 @@ static void gsfBRBIntensity_toJson(cJSON *json, gsfBRBIntensity *brb) {
         cJSON *brb_json = cJSON_AddObjectToObject(json, "brb_inten");
         cJSON_AddNumberToObject(brb_json, "bits_per_sample", (int) brb->bits_per_sample);
         cJSON_AddNumberToObject(brb_json, "applied_corrections", brb->applied_corrections);
-        char *json_str = cJSON_PrintUnformatted(brb_json); 
-        printf("BRB = %s\n", json_str);
     }
 }
 
@@ -102,8 +100,6 @@ static void gsfSBAmpSpecific_toJson(cJSON *json, t_gsfSBAmpSpecific sensor_data)
 static void gsfSeaBeamSpecific_toJson(cJSON *json, t_gsfSeaBeamSpecific sensor_data) {
     cJSON *sensor_json = cJSON_AddObjectToObject(json, "gsfSeaBeamSpecific");
     cJSON_AddNumberToObject(sensor_json, "EclipseTime", (int) sensor_data.EclipseTime);
-    // char *json_str = cJSON_PrintUnformatted(json); 
-    // printf("cJSON = %s\n", json_str);
 }
 
 static void gsfEM100Specific_toJson(cJSON *json, t_gsfEM100Specific sensor_data) {
@@ -116,8 +112,6 @@ static void gsfEM100Specific_toJson(cJSON *json, t_gsfEM100Specific sensor_data)
     cJSON_AddNumberToObject(sensor_json, "tvg", sensor_data.tvg);
     cJSON_AddNumberToObject(sensor_json, "pulse_length", sensor_data.pulse_length);
     cJSON_AddNumberToObject(sensor_json, "counter", sensor_data.counter);
-    // char *json_str = cJSON_PrintUnformatted(json); 
-    // printf("cJSON = %s\n", json_str);
 }
 
 static void gsfEM121ASpecific_toJson(cJSON *json, t_gsfEM121ASpecific sensor_data, const char *name) {
@@ -195,8 +189,6 @@ static void gsfSensorSpecific_toJson(cJSON *json, gsfSensorSpecific sensor_data)
     gsfEM950Specific_toJson(sensor_json, sensor_data.gsfEM1000Specific, "gsfEM1000Specific");
     gsfSeamapSpecific_toJson(sensor_json, sensor_data.gsfSeamapSpecific);
     gsfCmpSassSpecific_toJson(sensor_json, sensor_data.gsfCmpSassSpecific);
-    // char *json_str = cJSON_PrintUnformatted(sensor_json); 
-    // printf("cJSON = %s\n", json_str);
 }
 
 static cJSON *gsfSingleBeamPing_toJson(struct t_gsfSingleBeamPing ping) {
@@ -220,10 +212,17 @@ static cJSON *gsfSingleBeamPing_toJson(struct t_gsfSingleBeamPing ping) {
     return json;
 }
 
-static cJSON *gsfSwathBathyPing_toJson(struct t_gsfSwathBathyPing ping) {
+static cJSON *gsfSwathBathyPing_toJson(struct t_gsfSwathBathyPing ping, int include_druid_fields) {
     cJSON *json = cJSON_CreateObject();
     cJSON *body_json = cJSON_AddObjectToObject(json, "mb_ping");
 
+    double epoch_time = epoch_double(ping.ping_time);
+    if (include_druid_fields) {
+        cJSON_AddNumberToObject(json, "timestamp", epoch_time);
+        cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_SWATH_BATHYMETRY_PING);
+        cJSON_AddNumberToObject(json, "latitude", ping.latitude);
+        cJSON_AddNumberToObject(json, "longitude", ping.longitude);
+    }
     cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_SWATH_BATHYMETRY_PING);
     cJSON_AddNumberToObject(body_json, "ping_time", epoch_double(ping.ping_time));
     cJSON_AddNumberToObject(body_json, "latitude", ping.latitude);
@@ -285,7 +284,7 @@ static cJSON *gsfHeader_toJson(struct t_gsfHeader header) {
     return json;
 }
 
-char *gsfRecord_toJson(gsfDataID dataID, gsfRecords record) {
+char *gsfRecord_toJson(gsfDataID dataID, gsfRecords record, int include_druid_fields) {
     cJSON *json;
     switch (dataID.recordID) {
         case GSF_RECORD_HEADER:
@@ -295,7 +294,7 @@ char *gsfRecord_toJson(gsfDataID dataID, gsfRecords record) {
             json =  gsfSwathBathySummary_toJson(record.summary);
             break;
         case GSF_RECORD_SWATH_BATHYMETRY_PING:
-            json = gsfSwathBathyPing_toJson(record.mb_ping);
+            json = gsfSwathBathyPing_toJson(record.mb_ping, include_druid_fields);
             break;
         case GSF_RECORD_SINGLE_BEAM_PING:
             json = gsfSingleBeamPing_toJson(record.sb_ping);
@@ -306,20 +305,19 @@ char *gsfRecord_toJson(gsfDataID dataID, gsfRecords record) {
     return cJSON_PrintUnformatted(json); 
 }
 
-struct t_gsfJsonRecord gsfNextJsonRecord(int handle, int desired_record) {
+struct t_gsfJsonRecord gsfNextJsonRecord(int handle, int desired_record, int include_druid_fields) {
     gsfDataID gsfID;
     gsfRecords gsfRec;
     struct t_gsfJsonRecord nextRecord;
 
     int bytes_read;
     bytes_read = gsfRead(handle, desired_record, &gsfID, &gsfRec, NULL, 0);
-    printf("handle = %d, bytes_read_ctypes = %d\n", handle, bytes_read);
     if (bytes_read <= 0) {
         nextRecord.lastReturnValue = bytes_read;
         nextRecord.jsonRecord = NULL;
     } else {
         nextRecord.lastReturnValue = bytes_read;
-        nextRecord.jsonRecord = gsfRecord_toJson(gsfID, gsfRec);
+        nextRecord.jsonRecord = gsfRecord_toJson(gsfID, gsfRec, include_druid_fields);
     }
 
     return nextRecord;

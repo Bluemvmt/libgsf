@@ -381,6 +381,7 @@ gsfOpenBuffered(const char *filename, const int mode, int *handle, int buf_size)
     gsfDataID       id;
     FILE           *fp;
 
+    printf("filename = %s, mode = %d\n", filename, mode);
     /* Clear the gsfError value each time a new file is opened */
     gsfError = 0;
 
