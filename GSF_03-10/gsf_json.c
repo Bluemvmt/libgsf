@@ -1,8 +1,12 @@
+#include <libgen.h>
 #include <stdlib.h>
+#include <string.h>
 #include "../cjson/cJSON.h"
 #include "gsf_json.h"
 #include "gsf.h"
 
+
+gsfJsonFile gsfJsonFiles[GSF_MAX_OPEN_FILES];
 
 static double epoch_double(struct timespec tv) {
   char time_str[32];
@@ -42,14 +46,49 @@ static void add_short_array(cJSON *json, const char *name, unsigned short *array
     }
 }
 
-cJSON *gsfAttitude_toJson(struct t_gsfAttitude attitude) {
+cJSON *gsfComment_toJson(struct t_gsfComment comment, gsfJsonFile gsfJsonFileInfo) {
     cJSON *json = cJSON_CreateObject();
+    cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_COMMENT);
+    double epoch_time = epoch_double(comment.comment_time);
+    if (gsfJsonFileInfo.include_denormalized_fields) {
+        cJSON_AddNumberToObject(json, "timestamp", epoch_time);
+        cJSON_AddStringToObject(json, "gsf_version", gsfJsonFileInfo.gsf_version);
+    }
+    cJSON *body_json = cJSON_AddObjectToObject(json, "json_record");
+    cJSON_AddNumberToObject(body_json, "comment_length", comment.comment_length);
+    cJSON_AddStringToObject(body_json, "comment", comment.comment);
     return json;
 }
 
-cJSON *gsfSwathBathySummary_toJson(struct t_gsfSwathBathySummary summary) {
+cJSON *gsfAttitude_toJson(struct t_gsfAttitude attitude, int include_druid_fields) {
     cJSON *json = cJSON_CreateObject();
+    cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_ATTITUDE);
+    double epoch_time = epoch_double(*attitude.attitude_time);
+    if (include_druid_fields) {
+        cJSON_AddNumberToObject(json, "timestamp", epoch_time);
+    }
+    cJSON *body_json = cJSON_AddObjectToObject(json, "json_record");
+    cJSON_AddNumberToObject(body_json, "start_time", epoch_time);
+    cJSON_AddNumberToObject(body_json, "num_measurements", attitude.num_measurements);
+    cJSON_AddNumberToObject(body_json, "pitch", *attitude.pitch);
+    cJSON_AddNumberToObject(body_json, "roll", *attitude.roll);
+    cJSON_AddNumberToObject(body_json, "heave", *attitude.heave);
+    cJSON_AddNumberToObject(body_json, "heading", *attitude.heading);
+
+    return json;
+}
+
+cJSON *gsfSwathBathySummary_toJson(struct t_gsfSwathBathySummary summary, gsfJsonFile gsfJsonFileInfo) {
+    cJSON *json = cJSON_CreateObject();   
     cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_SWATH_BATHY_SUMMARY);
+
+    if (gsfJsonFileInfo.include_denormalized_fields) {
+        cJSON_AddStringToObject(json, "gsf_version", gsfJsonFileInfo.gsf_version);
+        cJSON_AddStringToObject(json, "file_name", gsfJsonFileInfo.file_name);
+        cJSON_AddNumberToObject(json, "timestamp", epoch_double(summary.start_time));
+        cJSON_AddNumberToObject(json, "latitude", summary.min_latitude);
+        cJSON_AddNumberToObject(json, "longitude", summary.min_longitude);
+    }
     cJSON *body_json = cJSON_AddObjectToObject(json, "summary");
     cJSON_AddNumberToObject(body_json, "start_time", epoch_double(summary.start_time));
     cJSON_AddNumberToObject(body_json, "end_time", epoch_double(summary.end_time));
@@ -194,7 +233,7 @@ static void gsfSensorSpecific_toJson(cJSON *json, gsfSensorSpecific sensor_data)
 static cJSON *gsfSingleBeamPing_toJson(struct t_gsfSingleBeamPing ping) {
     cJSON *json = cJSON_CreateObject();
     cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_SINGLE_BEAM_PING);
-    cJSON *body_json = cJSON_AddObjectToObject(json, "sb_ping");
+    cJSON *body_json = cJSON_AddObjectToObject(json, "json_record");
     cJSON_AddNumberToObject(body_json, "ping_time", epoch_double(ping.ping_time));
     cJSON_AddNumberToObject(body_json, "latitude", ping.latitude);
     cJSON_AddNumberToObject(body_json, "longitude", ping.longitude);
@@ -212,14 +251,15 @@ static cJSON *gsfSingleBeamPing_toJson(struct t_gsfSingleBeamPing ping) {
     return json;
 }
 
-static cJSON *gsfSwathBathyPing_toJson(struct t_gsfSwathBathyPing ping, int include_druid_fields) {
+static cJSON *gsfSwathBathyPing_toJson(struct t_gsfSwathBathyPing ping, gsfJsonFile gsfJsonFileInfo) {
     cJSON *json = cJSON_CreateObject();
-    cJSON *body_json = cJSON_AddObjectToObject(json, "mb_ping");
+    cJSON *body_json = cJSON_AddObjectToObject(json, "json_record");
 
     double epoch_time = epoch_double(ping.ping_time);
-    if (include_druid_fields) {
+    if (gsfJsonFileInfo.include_denormalized_fields) {
+        cJSON_AddStringToObject(json, "gsf_version", gsfJsonFileInfo.gsf_version);
+        cJSON_AddStringToObject(json, "file_name", gsfJsonFileInfo.file_name);
         cJSON_AddNumberToObject(json, "timestamp", epoch_time);
-        cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_SWATH_BATHYMETRY_PING);
         cJSON_AddNumberToObject(json, "latitude", ping.latitude);
         cJSON_AddNumberToObject(json, "longitude", ping.longitude);
     }
@@ -284,17 +324,20 @@ static cJSON *gsfHeader_toJson(struct t_gsfHeader header) {
     return json;
 }
 
-char *gsfRecord_toJson(gsfDataID dataID, gsfRecords record, int include_druid_fields) {
+char *gsfRecord_toJson(gsfDataID dataID, gsfRecords record, gsfJsonFile gsfJsonFileInfo) {
     cJSON *json;
     switch (dataID.recordID) {
         case GSF_RECORD_HEADER:
             json = gsfHeader_toJson(record.header);
             break;
+        case GSF_RECORD_COMMENT:
+            json = gsfComment_toJson(record.comment, gsfJsonFileInfo);
+            break;
         case GSF_RECORD_SWATH_BATHY_SUMMARY:
-            json =  gsfSwathBathySummary_toJson(record.summary);
+            json =  gsfSwathBathySummary_toJson(record.summary, gsfJsonFileInfo);
             break;
         case GSF_RECORD_SWATH_BATHYMETRY_PING:
-            json = gsfSwathBathyPing_toJson(record.mb_ping, include_druid_fields);
+            json = gsfSwathBathyPing_toJson(record.mb_ping, gsfJsonFileInfo);
             break;
         case GSF_RECORD_SINGLE_BEAM_PING:
             json = gsfSingleBeamPing_toJson(record.sb_ping);
@@ -303,6 +346,23 @@ char *gsfRecord_toJson(gsfDataID dataID, gsfRecords record, int include_druid_fi
             return NULL;
     }
     return cJSON_PrintUnformatted(json); 
+}
+
+int gsfOpenForJson(char *filename, const int mode, int *handle, int buf_size, int include_denormlized_fields) {
+    int retvalue = gsfOpenBuffered(filename, mode, handle, buf_size);
+    if (retvalue == 0) {
+        memcpy(gsfJsonFiles[*handle].file_name, basename(filename), MAX_FILE_NAME_SIZE);
+        gsfJsonFiles[*handle].include_denormalized_fields = include_denormlized_fields;
+        gsfJsonFiles[*handle].gsf_version_set = 0;
+    }
+    return retvalue;
+}
+
+int gsfCloseForJson(int handle) {
+    gsfJsonFiles[handle].file_name[0] = 0;
+    gsfJsonFiles[handle].gsf_version_set = 0;
+    gsfJsonFiles[handle].gsf_version[0] = 0;
+    return gsfClose(handle);
 }
 
 struct t_gsfJsonRecord gsfNextJsonRecord(int handle, int desired_record, int include_druid_fields) {
@@ -317,7 +377,12 @@ struct t_gsfJsonRecord gsfNextJsonRecord(int handle, int desired_record, int inc
         nextRecord.jsonRecord = NULL;
     } else {
         nextRecord.lastReturnValue = bytes_read;
-        nextRecord.jsonRecord = gsfRecord_toJson(gsfID, gsfRec, include_druid_fields);
+        nextRecord.jsonRecord = gsfRecord_toJson(gsfID, gsfRec, gsfJsonFiles[handle]);
+        printf("recordID = %d, gsf_version_set = %d\n", gsfID.recordID, gsfJsonFiles[handle].gsf_version_set);
+        if (gsfID.recordID == GSF_RECORD_HEADER && !gsfJsonFiles[handle].gsf_version_set) {
+            memcpy(gsfJsonFiles[handle].gsf_version, gsfRec.header.version, strlen(gsfRec.header.version));
+            gsfJsonFiles[handle].gsf_version_set = 1;
+        }
     }
 
     return nextRecord;
