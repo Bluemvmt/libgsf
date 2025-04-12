@@ -53,6 +53,7 @@ cJSON *gsfComment_toJson(struct t_gsfComment comment, gsfJsonFile gsfJsonFileInf
     if (gsfJsonFileInfo.include_denormalized_fields) {
         cJSON_AddNumberToObject(json, "timestamp", epoch_time);
         cJSON_AddStringToObject(json, "gsf_version", gsfJsonFileInfo.gsf_version);
+        cJSON_AddStringToObject(json, "file_name", gsfJsonFileInfo.file_name);
     }
     cJSON *body_json = cJSON_AddObjectToObject(json, "json_record");
     cJSON_AddNumberToObject(body_json, "comment_length", comment.comment_length);
@@ -60,11 +61,11 @@ cJSON *gsfComment_toJson(struct t_gsfComment comment, gsfJsonFile gsfJsonFileInf
     return json;
 }
 
-cJSON *gsfAttitude_toJson(struct t_gsfAttitude attitude, int include_druid_fields) {
+cJSON *gsfAttitude_toJson(struct t_gsfAttitude attitude, int include_denormalized_fields) {
     cJSON *json = cJSON_CreateObject();
     cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_ATTITUDE);
     double epoch_time = epoch_double(*attitude.attitude_time);
-    if (include_druid_fields) {
+    if (include_denormalized_fields) {
         cJSON_AddNumberToObject(json, "timestamp", epoch_time);
     }
     cJSON *body_json = cJSON_AddObjectToObject(json, "json_record");
@@ -316,20 +317,10 @@ static cJSON *gsfSwathBathyPing_toJson(struct t_gsfSwathBathyPing ping, gsfJsonF
     return json;
 }
 
-static cJSON *gsfHeader_toJson(struct t_gsfHeader header) {
-    cJSON *json = cJSON_CreateObject();
-    cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_HEADER);
-    cJSON *body_json = cJSON_AddObjectToObject(json, "header");
-    cJSON_AddStringToObject(body_json, "version", header.version);
-    return json;
-}
 
 char *gsfRecord_toJson(gsfDataID dataID, gsfRecords record, gsfJsonFile gsfJsonFileInfo) {
     cJSON *json;
     switch (dataID.recordID) {
-        case GSF_RECORD_HEADER:
-            json = gsfHeader_toJson(record.header);
-            break;
         case GSF_RECORD_COMMENT:
             json = gsfComment_toJson(record.comment, gsfJsonFileInfo);
             break;
@@ -365,7 +356,7 @@ int gsfCloseForJson(int handle) {
     return gsfClose(handle);
 }
 
-struct t_gsfJsonRecord gsfNextJsonRecord(int handle, int desired_record, int include_druid_fields) {
+struct t_gsfJsonRecord gsfNextJsonRecord(int handle, int desired_record, int include_denormalized_fields) {
     gsfDataID gsfID;
     gsfRecords gsfRec;
     struct t_gsfJsonRecord nextRecord;
@@ -377,11 +368,12 @@ struct t_gsfJsonRecord gsfNextJsonRecord(int handle, int desired_record, int inc
         nextRecord.jsonRecord = NULL;
     } else {
         nextRecord.lastReturnValue = bytes_read;
-        nextRecord.jsonRecord = gsfRecord_toJson(gsfID, gsfRec, gsfJsonFiles[handle]);
-        printf("recordID = %d, gsf_version_set = %d\n", gsfID.recordID, gsfJsonFiles[handle].gsf_version_set);
-        if (gsfID.recordID == GSF_RECORD_HEADER && !gsfJsonFiles[handle].gsf_version_set) {
+        if (gsfID.recordID == GSF_RECORD_HEADER) {
             memcpy(gsfJsonFiles[handle].gsf_version, gsfRec.header.version, strlen(gsfRec.header.version));
             gsfJsonFiles[handle].gsf_version_set = 1;
+            nextRecord.jsonRecord = NULL;
+        } else {
+            nextRecord.jsonRecord = gsfRecord_toJson(gsfID, gsfRec, gsfJsonFiles[handle]);
         }
     }
 
