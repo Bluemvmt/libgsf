@@ -2,6 +2,6 @@
 *.a
 *.so
 
-tests/bin/
+*/tests/bin/**
 # Leftover Multipasss files
 .fuse*
