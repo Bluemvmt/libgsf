@@ -90,7 +90,7 @@ cJSON *gsfSwathBathySummary_toJson(struct t_gsfSwathBathySummary summary, gsfJso
         cJSON_AddNumberToObject(json, "latitude", summary.min_latitude);
         cJSON_AddNumberToObject(json, "longitude", summary.min_longitude);
     }
-    cJSON *body_json = cJSON_AddObjectToObject(json, "summary");
+    cJSON *body_json = cJSON_AddObjectToObject(json, "json_record");
     cJSON_AddNumberToObject(body_json, "start_time", epoch_double(summary.start_time));
     cJSON_AddNumberToObject(body_json, "end_time", epoch_double(summary.end_time));
     cJSON_AddNumberToObject(body_json, "min_latitude", summary.min_latitude);
@@ -345,6 +345,7 @@ int gsfOpenForJson(char *filename, const int mode, int *handle, int buf_size, in
         memcpy(gsfJsonFiles[*handle].file_name, basename(filename), MAX_FILE_NAME_SIZE);
         gsfJsonFiles[*handle].include_denormalized_fields = include_denormlized_fields;
         gsfJsonFiles[*handle].gsf_version_set = 0;
+        strncpy(gsfJsonFiles[*handle].gsf_version, "NA", 3);
     }
     return retvalue;
 }
@@ -356,7 +357,7 @@ int gsfCloseForJson(int handle) {
     return gsfClose(handle);
 }
 
-struct t_gsfJsonRecord gsfNextJsonRecord(int handle, int desired_record, int include_denormalized_fields) {
+struct t_gsfJsonRecord gsfNextJsonRecord(int handle, int desired_record) {
     gsfDataID gsfID;
     gsfRecords gsfRec;
     struct t_gsfJsonRecord nextRecord;

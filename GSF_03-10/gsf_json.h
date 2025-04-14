@@ -19,9 +19,9 @@ typedef struct t_gsfJsonFile {
 }
 gsfJsonFile;
 
-int gsfOpenForJson(char *filename, const int mode, int *handle, int buf_size, int include_dernormalized_fields);
+int gsfOpenForJson(char *filename, const int mode, int *handle, int buf_size, int include_denormalized_fields);
 int gsfCloseForJson(const int handle);
 char *gsfRecord_toJson(gsfDataID dataID, gsfRecords record, gsfJsonFile gsfJsonFileInfo);
-struct t_gsfJsonRecord gsfNextJsonRecord(int handle, int desired_record, int include_druid_fields);
+struct t_gsfJsonRecord gsfNextJsonRecord(int handle, int desired_record);
 
 #endif
