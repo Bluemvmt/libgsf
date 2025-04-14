@@ -13,14 +13,14 @@ int main(int argc, char **argv) {
     if (status == 0) {
         int bytes;
 
-        nextRec = gsfNextJsonRecord(gsfHandle, desired_record, 1);
+        nextRec = gsfNextJsonRecord(gsfHandle, desired_record);
         while (nextRec.lastReturnValue > 0) {
             if (nextRec.jsonRecord != NULL) {
                 printf("cJSON = %s\n", nextRec.jsonRecord);
             } else {
                 printf("record type not supported\n");
             }
-            nextRec = gsfNextJsonRecord(gsfHandle, desired_record, 1);
+            nextRec = gsfNextJsonRecord(gsfHandle, desired_record);
         }    
         gsfCloseForJson(gsfHandle);
     }
