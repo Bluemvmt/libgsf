@@ -61,6 +61,24 @@ cJSON *gsfComment_toJson(struct t_gsfComment comment, gsfJsonFile gsfJsonFileInf
     return json;
 }
 
+cJSON *gsfHistory_toJson(struct t_gsfHistory history, gsfJsonFile gsfJsonFileInfo) {
+    cJSON *json = cJSON_CreateObject();
+    cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_HISTORY);
+    double epoch_time = epoch_double(history.history_time);
+    if (gsfJsonFileInfo.include_denormalized_fields) {
+        cJSON_AddStringToObject(json, "gsf_version", gsfJsonFileInfo.gsf_version);
+        cJSON_AddStringToObject(json, "file_name", gsfJsonFileInfo.file_name);
+        cJSON_AddNumberToObject(json, "timestamp", epoch_time);
+    }
+    cJSON *body_json = cJSON_AddObjectToObject(json, "json_record");
+    cJSON_AddNumberToObject(body_json, "history_time", epoch_time);
+    cJSON_AddStringToObject(body_json, "host_name", history.host_name);
+    cJSON_AddStringToObject(body_json, "operator_name", history.operator_name);
+    cJSON_AddStringToObject(body_json, "command_line", history.command_line);
+    cJSON_AddStringToObject(body_json, "comment", history.comment);
+    return json;
+}
+
 cJSON *gsfAttitude_toJson(struct t_gsfAttitude attitude, int include_denormalized_fields) {
     cJSON *json = cJSON_CreateObject();
     cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_ATTITUDE);
@@ -175,6 +193,7 @@ static void gsfEMRunTime_toJson(cJSON *sensor_json, t_gsfEMRunTime runtime) {
     cJSON_AddNumberToObject(sensor_json, "rx_bandwidth", runtime.rx_bandwidth);
     cJSON_AddNumberToObject(sensor_json, "rx_fixed_gain", runtime.rx_fixed_gain);
     cJSON_AddNumberToObject(sensor_json, "tvg_cross_over_angle", runtime.tvg_cross_over_angle);
+    fprintf(stderr, "ssv_source = %d\n", runtime.ssv_source);
     switch (runtime.ssv_source) {
         case 0:
             cJSON_AddStringToObject(sensor_json, "ssv_source", "sensor");
@@ -414,8 +433,6 @@ static void gsfCmpSassSpecific_toJson(cJSON *sensor_json, t_gsfCmpSassSpecific s
 static void gsfSensorSpecific_toJson(cJSON *json, int sensor_id, gsfSwathBathyPing ping) {
     cJSON *sensor_json = NULL;
 
-
-    printf("XXXsensor_id = %d\n", sensor_id);
     gsfSensorSpecific sensor_data = ping.sensor_data;
     switch (sensor_id) {
         case (GSF_SWATH_BATHY_SUBRECORD_UNKNOWN):
@@ -695,6 +712,9 @@ char *gsfRecord_toJson(gsfDataID dataID, gsfRecords record, gsfJsonFile gsfJsonF
     switch (dataID.recordID) {
         case GSF_RECORD_COMMENT:
             json = gsfComment_toJson(record.comment, gsfJsonFileInfo);
+            break;
+        case GSF_RECORD_HISTORY:
+            json = gsfHistory_toJson(record.history, gsfJsonFileInfo);
             break;
         case GSF_RECORD_SWATH_BATHY_SUMMARY:
             json =  gsfSwathBathySummary_toJson(record.summary, gsfJsonFileInfo);
