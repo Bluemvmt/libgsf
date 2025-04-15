@@ -154,8 +154,150 @@ static void gsfEM100Specific_toJson(cJSON *json, t_gsfEM100Specific sensor_data)
     cJSON_AddNumberToObject(sensor_json, "counter", sensor_data.counter);
 }
 
-static void gsfEM121ASpecific_toJson(cJSON *json, t_gsfEM121ASpecific sensor_data, const char *name) {
-    cJSON *sensor_json = cJSON_AddObjectToObject(json, name);
+static void gsfEMRunTime_toJson(cJSON *sensor_json, t_gsfEMRunTime runtime) {
+    cJSON_AddNumberToObject(sensor_json, "model_number", runtime.model_number);
+    cJSON_AddNumberToObject(sensor_json, "dg_time", epoch_double(runtime.dg_time));
+    cJSON_AddNumberToObject(sensor_json, "ping_counter", runtime.ping_counter);
+    cJSON_AddNumberToObject(sensor_json, "serial_number", runtime.serial_number);
+    cJSON_AddNumberToObject(sensor_json, "operator_station_status", runtime.operator_station_status);
+    cJSON_AddNumberToObject(sensor_json, "processing_unit_status", runtime.processing_unit_status);
+    cJSON_AddNumberToObject(sensor_json, "bsp_status", runtime.bsp_status);
+    cJSON_AddNumberToObject(sensor_json, "head_transceiver_status", runtime.head_transceiver_status);
+    cJSON_AddNumberToObject(sensor_json, "mode", runtime.mode);
+    cJSON_AddNumberToObject(sensor_json, "filter_id", runtime.filter_id);
+    cJSON_AddNumberToObject(sensor_json, "min_depth", runtime.min_depth);
+    cJSON_AddNumberToObject(sensor_json, "max_depth", runtime.max_depth);
+    cJSON_AddNumberToObject(sensor_json, "absorption", runtime.absorption);
+    cJSON_AddNumberToObject(sensor_json, "tx_pulse_length", runtime.tx_pulse_length);
+    cJSON_AddNumberToObject(sensor_json, "tx_beam_width", runtime.tx_beam_width);
+    cJSON_AddNumberToObject(sensor_json, "tx_power_re_max", runtime.tx_power_re_max);
+    cJSON_AddNumberToObject(sensor_json, "rx_beam_width", runtime.rx_beam_width);
+    cJSON_AddNumberToObject(sensor_json, "rx_bandwidth", runtime.rx_bandwidth);
+    cJSON_AddNumberToObject(sensor_json, "rx_fixed_gain", runtime.rx_fixed_gain);
+    cJSON_AddNumberToObject(sensor_json, "tvg_cross_over_angle", runtime.tvg_cross_over_angle);
+    switch (runtime.ssv_source) {
+        case 0:
+            cJSON_AddStringToObject(sensor_json, "ssv_source", "sensor");
+            break;
+        case 1:
+            cJSON_AddStringToObject(sensor_json, "ssv_source", "manual");
+            break;
+        case 2:
+            cJSON_AddStringToObject(sensor_json, "ssv_source", "profile");
+            break;
+    }
+    cJSON_AddNumberToObject(sensor_json, "max_port_swath_width", runtime.max_port_swath_width);
+    switch (runtime.beam_spacing) {
+        case 0:
+            cJSON_AddStringToObject(sensor_json, "beam_spacing", "beamwidth");
+            break;
+        case 1:
+            cJSON_AddStringToObject(sensor_json, "beam_spacing", "equiangle");
+            break;
+        case 2:
+            cJSON_AddStringToObject(sensor_json, "beam_spacing", "equidistant");
+            break;
+        case 3:
+            cJSON_AddStringToObject(sensor_json, "beam_spacing", "intermediate");
+            break;
+    }
+    cJSON_AddNumberToObject(sensor_json, "max_port_coverage", runtime.max_port_coverage);
+    cJSON_AddNumberToObject(sensor_json, "stabilization", runtime.stabilization);
+    cJSON_AddNumberToObject(sensor_json, "max_stbd_coverage", runtime.max_stbd_coverage);
+    cJSON_AddNumberToObject(sensor_json, "max_stbd_swath_width", runtime.max_stbd_swath_width);
+    cJSON_AddNumberToObject(sensor_json, "durotong_speed", runtime.durotong_speed);
+    cJSON_AddNumberToObject(sensor_json, "hi_low_absorption_ratio", runtime.hi_low_absorption_ratio);
+    cJSON_AddNumberToObject(sensor_json, "tx_along_tilt", runtime.tx_along_tilt);
+    cJSON_AddNumberToObject(sensor_json, "filter_id_2", runtime.filter_id_2);
+}
+
+static cJSON *gsfEM3Runtime_toJson(struct t_gsfEM3RunTime runtime) {
+    cJSON *json = cJSON_CreateObject();
+    cJSON_AddNumberToObject(json, "model_number", runtime.model_number);
+    cJSON_AddNumberToObject(json, "dg_tome", epoch_double(runtime.dg_time));
+    cJSON_AddNumberToObject(json, "ping_number", runtime.ping_number);
+    cJSON_AddNumberToObject(json, "serial_number", runtime.serial_number);
+    cJSON_AddNumberToObject(json, "system_status", runtime.system_status);
+    switch (runtime.mode) {
+        case 0:
+            cJSON_AddStringToObject(json, "mode", "nearfield");
+            break;
+        case 1:
+            cJSON_AddStringToObject(json, "mode", "normal");
+            break;
+        case 2:
+            cJSON_AddStringToObject(json, "mode", "target");
+            break;
+        case 3:
+            cJSON_AddStringToObject(json, "mode", "deep");
+            break;
+        case 4:
+            cJSON_AddStringToObject(json, "mode", "very deep");
+            break;
+    }   
+    cJSON_AddNumberToObject(json, "filter_id", runtime.filter_id);
+    cJSON_AddNumberToObject(json, "min_depth", runtime.min_depth);
+    cJSON_AddNumberToObject(json, "max_depth", runtime.max_depth);
+    cJSON_AddNumberToObject(json, "absorption", runtime.absorption);
+    cJSON_AddNumberToObject(json, "pulse_length", runtime.pulse_length);
+    cJSON_AddNumberToObject(json, "transmit_beam_width", runtime.transmit_beam_width);
+    cJSON_AddNumberToObject(json, "power_reduction", runtime.power_reduction);
+    cJSON_AddNumberToObject(json, "receive_beam_width", runtime.receive_beam_width);
+    cJSON_AddNumberToObject(json, "receive_bandwidth", runtime.receive_bandwidth);
+    cJSON_AddNumberToObject(json, "receive_gain", runtime.receive_gain);
+    cJSON_AddNumberToObject(json, "cross_over_angle", runtime.cross_over_angle);
+    switch (runtime.ssv_source) {
+        case 0:
+            cJSON_AddStringToObject(json, "ssv_source", "sensor");
+            break;
+        case 1:
+            cJSON_AddStringToObject(json, "ssv_source", "manual");
+            break;
+        case 2:
+            cJSON_AddStringToObject(json, "ssv_source", "profile");
+            break;
+    }
+    cJSON_AddNumberToObject(json, "swath_width", runtime.swath_width);
+    switch (runtime.beam_spacing) {
+        case 0:
+            cJSON_AddStringToObject(json, "beam_spacing", "beamwidth");
+            break;
+        case 1:
+            cJSON_AddStringToObject(json, "beam_spacing", "equiangle");
+            break;
+        case 2:
+            cJSON_AddStringToObject(json, "beam_spacing", "equidistant");
+            break;
+        case 3:
+            cJSON_AddStringToObject(json, "beam_spacing", "intermediate");
+            break;
+    }
+    cJSON_AddNumberToObject(json, "coverage_sector", runtime.coverage_sector);
+    cJSON_AddNumberToObject(json, "stabilization", runtime.stabilization);
+    cJSON_AddNumberToObject(json, "port_swath_width", runtime.port_swath_width);
+    cJSON_AddNumberToObject(json, "stbd_swath_width", runtime.stbd_swath_width);
+    cJSON_AddNumberToObject(json, "port_coverage_sector", runtime.port_coverage_sector);
+    cJSON_AddNumberToObject(json, "stbd_coverage_sector", runtime.stbd_coverage_sector);
+    cJSON_AddNumberToObject(json, "hilo_freq_absorp_ratio", runtime.hilo_freq_absorp_ratio);
+    return json;
+}
+
+static void gsfEM3Specific_toJson(cJSON *sensor_json, t_gsfEM3Specific sensor_data) {
+    cJSON_AddNumberToObject(sensor_json, "model_number", sensor_data.model_number);
+    cJSON_AddNumberToObject(sensor_json, "ping_number", sensor_data.ping_number);
+    cJSON_AddNumberToObject(sensor_json, "serial_number", sensor_data.serial_number);
+    cJSON_AddNumberToObject(sensor_json, "surface_velocity", sensor_data.surface_velocity);
+    cJSON_AddNumberToObject(sensor_json, "transducer_depth", sensor_data.transducer_depth);
+    cJSON_AddNumberToObject(sensor_json, "valid_beams", sensor_data.valid_beams);
+    cJSON_AddNumberToObject(sensor_json, "sample_rate", sensor_data.sample_rate);
+    cJSON_AddNumberToObject(sensor_json, "depth_difference", sensor_data.depth_difference);
+    cJSON_AddNumberToObject(sensor_json, "offset_multiplier", sensor_data.offset_multiplier);
+    cJSON *gsfEM3RuntimeArray = cJSON_AddArrayToObject(sensor_json, "gsfEM3RunTime");
+    cJSON_AddItemToArray(gsfEM3RuntimeArray, gsfEM3Runtime_toJson(sensor_data.run_time[0]));
+    cJSON_AddItemToArray(gsfEM3RuntimeArray, gsfEM3Runtime_toJson(sensor_data.run_time[1]));
+}
+
+static void gsfEM121ASpecific_toJson(cJSON *sensor_json, t_gsfEM121ASpecific sensor_data) {
     cJSON_AddNumberToObject(sensor_json, "ping_number", sensor_data.ping_number);
     cJSON_AddNumberToObject(sensor_json, "mode", sensor_data.mode);
     cJSON_AddNumberToObject(sensor_json, "valid_beams", sensor_data.valid_beams);
@@ -177,8 +319,7 @@ static void gsfSeaBatSpecific_toJson(cJSON *json, t_gsfSeaBatSpecific sensor_dat
     cJSON_AddNumberToObject(sensor_json, "receive_gain", sensor_data.receive_gain);
 }
 
-static void gsfEM950Specific_toJson(cJSON *json, t_gsfEM950Specific sensor_data, const char *name) {
-    cJSON *sensor_json = cJSON_AddObjectToObject(json, name);
+static void gsfEM950Specific_toJson(cJSON *sensor_json, t_gsfEM950Specific sensor_data) {
     cJSON_AddNumberToObject(sensor_json, "ping_number", sensor_data.ping_number);
     cJSON_AddNumberToObject(sensor_json, "mode", sensor_data.mode);
     cJSON_AddNumberToObject(sensor_json, "ping_quality", sensor_data.ping_quality);
@@ -200,8 +341,61 @@ static void gsfSeamapSpecific_toJson(cJSON *json, t_gsfSeamapSpecific sensor_dat
     cJSON_AddNumberToObject(sensor_json, "temperature", sensor_data.temperature);
 }
 
-static void gsfCmpSassSpecific_toJson(cJSON *json, t_gsfCmpSassSpecific sensor_data) {
-    cJSON *sensor_json = cJSON_AddObjectToObject(json, "gsfCmpSassSpecific");
+static cJSON *gsfEM4TxSector_toJson(t_gsfEM4TxSector sector) {
+    cJSON *json = cJSON_CreateObject();
+    cJSON_AddNumberToObject(json, "tilt_angle", sector.tilt_angle);
+    cJSON_AddNumberToObject(json, "focus_range", sector.focus_range);
+    cJSON_AddNumberToObject(json, "signal_length", sector.signal_length);
+    cJSON_AddNumberToObject(json, "transmit_delay", sector.transmit_delay);
+    cJSON_AddNumberToObject(json, "center_frequency", sector.center_frequency);
+    cJSON_AddNumberToObject(json, "mean_absorption", sector.mean_absorption);
+    switch (sector.waveform_id) {
+        case 0:
+            cJSON_AddStringToObject(json, "waveform_id", "CW");
+            break;
+        case 1:
+            cJSON_AddStringToObject(json, "waveform_id", "FM upsweep");
+            break;
+        case 2:
+            cJSON_AddStringToObject(json, "waveform_id", "FM downsweep");
+            break;
+    }
+    cJSON_AddNumberToObject(json, "sector_number", sector.sector_number);
+    cJSON_AddNumberToObject(json, "signal_bandwidth", sector.signal_bandwidth);
+    return json;
+}
+
+static void gsfEMPUStatus_toJson(cJSON *status_json, t_gsfEMPUStatus status) {
+    cJSON_AddNumberToObject(status_json, "pu_cpu_load", status.pu_cpu_load);
+    cJSON_AddNumberToObject(status_json, "sensor_status", status.sensor_status);
+    cJSON_AddNumberToObject(status_json, "achieved_port_coverage", status.achieved_port_coverage);
+    cJSON_AddNumberToObject(status_json, "achieved_stbd_coverage", status.achieved_stbd_coverage);
+    cJSON_AddNumberToObject(status_json, "yaw_stabilization", status.yaw_stabilization);
+}
+
+static void gsfEM4Specific_toJson(cJSON *sensor_json, t_gsfEM4Specific sensor_data) {
+    /* values from the XYZ datagram and raw range datagram */
+    cJSON_AddNumberToObject(sensor_json, "model_number", sensor_data.model_number);
+    cJSON_AddNumberToObject(sensor_json, "ping_counter", sensor_data.ping_counter);
+    cJSON_AddNumberToObject(sensor_json, "serial_number", sensor_data.serial_number);
+    cJSON_AddNumberToObject(sensor_json, "surface_velocity", sensor_data.surface_velocity);
+    cJSON_AddNumberToObject(sensor_json, "transducer_depth", sensor_data.transducer_depth);
+    cJSON_AddNumberToObject(sensor_json, "valid_detections", sensor_data.valid_detections);
+    cJSON_AddNumberToObject(sensor_json, "sampling_frequency", sensor_data.sampling_frequency);
+    cJSON_AddNumberToObject(sensor_json, "doppler_corr_scale", sensor_data.doppler_corr_scale);
+    cJSON_AddNumberToObject(sensor_json, "vehicle_depth", sensor_data.vehicle_depth);
+    cJSON_AddNumberToObject(sensor_json, "transmit_sectors", sensor_data.transmit_sectors);
+    cJSON *gsfEM4TxSectorArray = cJSON_AddArrayToObject(sensor_json, "sector");
+    for (int i = 0; i < GSF_MAX_EM4_SECTORS; i++) {
+        cJSON_AddItemToArray(gsfEM4TxSectorArray, gsfEM4TxSector_toJson(sensor_data.sector[i]));
+    }
+    cJSON *runtime_json = cJSON_AddObjectToObject(sensor_json, "run_time");
+    gsfEMRunTime_toJson(runtime_json, sensor_data.run_time);
+    cJSON *status_json = cJSON_AddObjectToObject(sensor_json, "pu_status");
+    gsfEMPUStatus_toJson(status_json, sensor_data.pu_status);
+}
+
+static void gsfCmpSassSpecific_toJson(cJSON *sensor_json, t_gsfCmpSassSpecific sensor_data) {
     cJSON_AddNumberToObject(sensor_json, "lfreq", sensor_data.lfreq);
     cJSON_AddNumberToObject(sensor_json, "lntens", sensor_data.lntens);
 }
@@ -217,19 +411,197 @@ static void gsfCmpSassSpecific_toJson(cJSON *json, t_gsfCmpSassSpecific sensor_d
 //     double          athwart_bw;             /* athwartships beam width in degrees */
 // }
 
-static void gsfSensorSpecific_toJson(cJSON *json, gsfSensorSpecific sensor_data) {
-    cJSON *sensor_json = cJSON_AddObjectToObject(json, "sensor_data");
-    gsfSBAmpSpecific_toJson(sensor_json, sensor_data.gsfSBAmpSpecific);
-    gsfSeaBeamSpecific_toJson(sensor_json, sensor_data.gsfSeaBeamSpecific);
-    gsfEM100Specific_toJson(sensor_json, sensor_data.gsfEM100Specific);
-    gsfEM121ASpecific_toJson(sensor_json, sensor_data.gsfEM121ASpecific, "gsfEM121ASpecific");
-    gsfEM121ASpecific_toJson(sensor_json, sensor_data.gsfEM121ASpecific, "gsfEM121Specific");
-    gsfSeaBatSpecific_toJson(sensor_json, sensor_data.gsfSeaBatSpecific);
-    gsfEM950Specific_toJson(sensor_json, sensor_data.gsfEM950Specific, "gsfEM950Specific");
-    gsfEM950Specific_toJson(sensor_json, sensor_data.gsfEM1000Specific, "gsfEM1000Specific");
-    gsfSeamapSpecific_toJson(sensor_json, sensor_data.gsfSeamapSpecific);
-    gsfCmpSassSpecific_toJson(sensor_json, sensor_data.gsfCmpSassSpecific);
+static void gsfSensorSpecific_toJson(cJSON *json, int sensor_id, gsfSwathBathyPing ping) {
+    cJSON *sensor_json = NULL;
+
+
+    printf("XXXsensor_id = %d\n", sensor_id);
+    gsfSensorSpecific sensor_data = ping.sensor_data;
+    switch (sensor_id) {
+        case (GSF_SWATH_BATHY_SUBRECORD_UNKNOWN):
+            cJSON_AddStringToObject(json, "sensor_name", gsfGetSonarTextName(&ping));
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_SEABEAM_SPECIFIC):
+            sensor_json = cJSON_AddObjectToObject(json, "sensor_data");
+            gsfSeaBeamSpecific_toJson(sensor_json, sensor_data.gsfSeaBeamSpecific);
+            cJSON_AddStringToObject(json, "sensor_name", gsfGetSonarTextName(&ping));
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM12_SPECIFIC):
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM100_SPECIFIC):
+            sensor_json = cJSON_AddObjectToObject(json, "sensor_data");
+            gsfEM100Specific_toJson(sensor_json, sensor_data.gsfEM100Specific);
+            cJSON_AddStringToObject(json, "sensor_name", gsfGetSonarTextName(&ping));
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM950_SPECIFIC):
+            sensor_json = cJSON_AddObjectToObject(json, "sensor_data");
+            gsfEM950Specific_toJson(sensor_json, sensor_data.gsfEM950Specific);
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM121A_SPECIFIC):
+            sensor_json = cJSON_AddObjectToObject(json, "sensor_data");
+            gsfEM121ASpecific_toJson(sensor_json, sensor_data.gsfEM121ASpecific);
+            cJSON_AddStringToObject(json, "sensor_name", gsfGetSonarTextName(&ping));
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM121_SPECIFIC):
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_SASS_SPECIFIC):
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_SEAMAP_SPECIFIC):
+            sensor_json = cJSON_AddObjectToObject(json, "sensor_data");
+            gsfSeamapSpecific_toJson(sensor_json, sensor_data.gsfSeamapSpecific);
+            cJSON_AddStringToObject(json, "sensor_name", gsfGetSonarTextName(&ping));
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_SEABAT_SPECIFIC):
+            sensor_json = cJSON_AddObjectToObject(json, "sensor_data");
+            gsfSeaBatSpecific_toJson(sensor_json, sensor_data.gsfSeaBatSpecific);
+            cJSON_AddStringToObject(json, "sensor_name", gsfGetSonarTextName(&ping));
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM1000_SPECIFIC):
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_TYPEIII_SEABEAM_SPECIFIC):
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_SB_AMP_SPECIFIC):
+            sensor_json = cJSON_AddObjectToObject(json, "sensor_data");
+            gsfSBAmpSpecific_toJson(sensor_json, sensor_data.gsfSBAmpSpecific);
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_SEABAT_II_SPECIFIC):
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_SEABAT_8101_SPECIFIC):
+            cJSON_AddStringToObject(json, "sensor_name", "UNIMPLEMENTED");
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_SEABEAM_2112_SPECIFIC):
+            cJSON_AddStringToObject(json, "sensor_name", "UNIMPLEMENTED");
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_ELAC_MKII_SPECIFIC):
+            cJSON_AddStringToObject(json, "sensor_name", "UNIMPLEMENTED");
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_CMP_SASS_SPECIFIC):
+            sensor_json = cJSON_AddObjectToObject(json, "sensor_data");
+            gsfCmpSassSpecific_toJson(sensor_json, sensor_data.gsfCmpSassSpecific);
+            cJSON_AddStringToObject(json, "sensor_name", gsfGetSonarTextName(&ping));
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM2000_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3000_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM1002_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM300_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM120_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3002_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3002D_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM121A_SIS_SPECIFIC):
+            sensor_json = cJSON_AddObjectToObject(json, "sensor_data");
+            gsfEM3Specific_toJson(sensor_json, sensor_data.gsfEM3Specific);
+            cJSON_AddStringToObject(json, "sensor_name", gsfGetSonarTextName(&ping));
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM2000_RAW_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3000_RAW_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM1002_RAW_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM300_RAW_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM120_RAW_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3002_RAW_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3000D_RAW_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM3002D_RAW_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM121A_SIS_RAW_SPECIFIC):
+            cJSON_AddStringToObject(json, "sensor_name", "UNIMPLEMENTED");
+            break;
+
+
+        case (GSF_SWATH_BATHY_SUBRECORD_RESON_8101_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_RESON_8111_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_RESON_8124_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_RESON_8125_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_RESON_8150_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_RESON_8160_SPECIFIC):
+            cJSON_AddStringToObject(json, "sensor_name", "UNIMPLEMENTED");
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_RESON_7125_SPECIFIC):
+            cJSON_AddStringToObject(json, "sensor_name", "UNIMPLEMENTED");
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_RESON_TSERIES_SPECIFIC):
+            cJSON_AddStringToObject(json, "sensor_name", "UNIMPLEMENTED");
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_EM710_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM302_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM122_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_EM2040_SPECIFIC):
+            sensor_json = cJSON_AddObjectToObject(json, "sensor_data");
+            gsfEM4Specific_toJson(sensor_json, ping.sensor_data.gsfEM4Specific);
+            cJSON_AddStringToObject(json, "sensor_name", gsfGetSonarTextName(&ping));
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_GEOSWATH_PLUS_SPECIFIC):
+            cJSON_AddStringToObject(json, "sensor_name", "UNIMPLEMENTED");
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_KLEIN_5410_BSS_SPECIFIC):
+            cJSON_AddStringToObject(json, "sensor_name", "UNIMPLEMENTED");
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_DELTA_T_SPECIFIC):
+            cJSON_AddStringToObject(json, "sensor_name", "UNIMPLEMENTED");
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2020_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2022_SPECIFIC):
+        case (GSF_SWATH_BATHY_SUBRECORD_R2SONIC_2024_SPECIFIC):
+            cJSON_AddStringToObject(json, "sensor_name", "UNIMPLEMENTED");
+            break;
+
+        case (GSF_SWATH_BATHY_SB_SUBRECORD_ECHOTRAC_SPECIFIC):
+            cJSON_AddStringToObject(json, "sensor_name", "UNIMPLEMENTED");
+            break;
+
+        case (GSF_SWATH_BATHY_SB_SUBRECORD_BATHY2000_SPECIFIC):
+            cJSON_AddStringToObject(json, "sensor_name", "UNIMPLEMENTED");
+            break;
+
+        case (GSF_SWATH_BATHY_SB_SUBRECORD_MGD77_SPECIFIC):
+            cJSON_AddStringToObject(json, "sensor_name", "UNIMPLEMENTED");
+            break;
+
+        case (GSF_SWATH_BATHY_SB_SUBRECORD_BDB_SPECIFIC):
+            cJSON_AddStringToObject(json, "sensor_name", "UNIMPLEMENTED");
+            break;
+
+        case (GSF_SWATH_BATHY_SB_SUBRECORD_NOSHDB_SPECIFIC):
+            cJSON_AddStringToObject(json, "sensor_name", "UNIMPLEMENTED");
+            break;
+
+        case (GSF_SWATH_BATHY_SB_SUBRECORD_PDD_SPECIFIC):
+            cJSON_AddStringToObject(json, "sensor_name", "UNIMPLEMENTED");
+            break;
+
+        case (GSF_SWATH_BATHY_SB_SUBRECORD_NAVISOUND_SPECIFIC):
+            cJSON_AddStringToObject(json, "sensor_name", "UNIMPLEMENTED");
+            break;
+
+        case (GSF_SWATH_BATHY_SUBRECORD_INTENSITY_SERIES_ARRAY):
+            cJSON_AddStringToObject(json, "sensor_name", "UNIMPLEMENTED");
+            break;
+    }
 }
+
 
 static cJSON *gsfSingleBeamPing_toJson(struct t_gsfSingleBeamPing ping) {
     cJSON *json = cJSON_CreateObject();
@@ -313,7 +685,7 @@ static cJSON *gsfSwathBathyPing_toJson(struct t_gsfSwathBathyPing ping, gsfJsonF
     add_double_array(body_json, "mean_abs_coeff", ping.mean_abs_coeff, ping.number_beams);
     cJSON_AddNumberToObject(body_json, "sensor_id", ping.sensor_id);
     gsfBRBIntensity_toJson(body_json, ping.brb_inten);
-    gsfSensorSpecific_toJson(body_json, ping.sensor_data);
+    gsfSensorSpecific_toJson(body_json, ping.sensor_id, ping);
     return json;
 }
 
