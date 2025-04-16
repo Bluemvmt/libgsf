@@ -38,3 +38,17 @@ IDs of the VM.  The ids on the left are the host user/group IDs.  The latter
 will likely vary between host machines so run **id** (this is unix like 
 systems and will be different for Windows) to get the IDs for your particular
 host.
+
+# Using Docker
+
+The other option is to do your development in a Docker container.  To do so:
+
+```
+docker run \
+  -it \
+  --rm \
+  --name libgsf-dev \
+  -v $(pwd):/home/ubuntu/src \
+  vshefferbluemvmt/libgsf-dev \
+  /bin/bash
+```
