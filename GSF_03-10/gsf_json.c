@@ -193,7 +193,6 @@ static void gsfEMRunTime_toJson(cJSON *sensor_json, t_gsfEMRunTime runtime) {
     cJSON_AddNumberToObject(sensor_json, "rx_bandwidth", runtime.rx_bandwidth);
     cJSON_AddNumberToObject(sensor_json, "rx_fixed_gain", runtime.rx_fixed_gain);
     cJSON_AddNumberToObject(sensor_json, "tvg_cross_over_angle", runtime.tvg_cross_over_angle);
-    fprintf(stderr, "ssv_source = %d\n", runtime.ssv_source);
     switch (runtime.ssv_source) {
         case 0:
             cJSON_AddStringToObject(sensor_json, "ssv_source", "sensor");
