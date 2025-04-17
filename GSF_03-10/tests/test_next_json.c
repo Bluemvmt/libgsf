@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
     struct t_gsfJsonRecord nextRec;
 
     int desired_record = atoi(argv[1]);
-    int status = gsfOpenForJson(argv[2], GSF_READONLY, &gsfHandle, 0, 1);
+    int status = gsfOpenForJson(argv[2], GSF_READONLY, &gsfHandle, 0, 1, 1);
     if (status == 0) {
         int bytes;
 

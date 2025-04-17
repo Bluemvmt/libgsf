@@ -46,6 +46,20 @@ static void add_short_array(cJSON *json, const char *name, unsigned short *array
     }
 }
 
+cJSON *gsfComment_flatten(struct t_gsfComment comment, gsfJsonFile gsfJsonFileInfo) {
+    cJSON *json = cJSON_CreateObject();
+    cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_COMMENT);
+    double timestamp = epoch_double(comment.comment_time);
+    cJSON_AddNumberToObject(json, "timestamp", timestamp);
+    cJSON_AddNumberToObject(json, "comment_time", timestamp);
+    cJSON_AddStringToObject(json, "gsf_version", gsfJsonFileInfo.gsf_version);
+    cJSON_AddStringToObject(json, "file_name", gsfJsonFileInfo.file_name);
+    cJSON_AddNumberToObject(json, "comment_length", comment.comment_length);
+    cJSON_AddStringToObject(json, "comment", comment.comment);
+
+    return json;
+}
+
 cJSON *gsfComment_toJson(struct t_gsfComment comment, gsfJsonFile gsfJsonFileInfo) {
     cJSON *json = cJSON_CreateObject();
     cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_COMMENT);
@@ -58,6 +72,22 @@ cJSON *gsfComment_toJson(struct t_gsfComment comment, gsfJsonFile gsfJsonFileInf
     cJSON *body_json = cJSON_AddObjectToObject(json, "json_record");
     cJSON_AddNumberToObject(body_json, "comment_length", comment.comment_length);
     cJSON_AddStringToObject(body_json, "comment", comment.comment);
+    return json;
+}
+
+cJSON *gsfHistory_flatten(struct t_gsfHistory history, gsfJsonFile gsfJsonFileInfo) {
+    cJSON *json = cJSON_CreateObject();
+    cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_HISTORY);
+    cJSON_AddStringToObject(json, "gsf_version", gsfJsonFileInfo.gsf_version);
+    cJSON_AddStringToObject(json, "file_name", gsfJsonFileInfo.file_name);
+    double timestamp = epoch_double(history.history_time);
+    cJSON_AddNumberToObject(json, "timestamp", timestamp);
+    cJSON_AddNumberToObject(json, "history_time", timestamp);
+    cJSON_AddStringToObject(json, "host_name", history.host_name);
+    cJSON_AddStringToObject(json, "operator_name", history.operator_name);
+    cJSON_AddStringToObject(json, "command_line", history.command_line);
+    cJSON_AddStringToObject(json, "comment", history.comment);
+
     return json;
 }
 
@@ -79,15 +109,30 @@ cJSON *gsfHistory_toJson(struct t_gsfHistory history, gsfJsonFile gsfJsonFileInf
     return json;
 }
 
-cJSON *gsfAttitude_toJson(struct t_gsfAttitude attitude, int include_denormalized_fields) {
+static cJSON *gsfAttitude_flatten(struct t_gsfAttitude attitude, gsfJsonFile gsfJsonFileInfo) {
+    cJSON *json = cJSON_CreateObject();
+    cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_ATTITUDE);
+    double timestamp = epoch_double(*attitude.attitude_time);
+    cJSON_AddNumberToObject(json, "timestamp", timestamp);
+    cJSON_AddNumberToObject(json, "attitude_time", timestamp);
+    cJSON_AddNumberToObject(json, "num_measurements", attitude.num_measurements);
+    cJSON_AddNumberToObject(json, "pitch", *attitude.pitch);
+    cJSON_AddNumberToObject(json, "roll", *attitude.roll);
+    cJSON_AddNumberToObject(json, "heave", *attitude.heave);
+    cJSON_AddNumberToObject(json, "heading", *attitude.heading);
+    
+    return json;
+}
+
+static cJSON *gsfAttitude_toJson(struct t_gsfAttitude attitude, gsfJsonFile gsfJsonFileInfo) {
     cJSON *json = cJSON_CreateObject();
     cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_ATTITUDE);
     double epoch_time = epoch_double(*attitude.attitude_time);
-    if (include_denormalized_fields) {
+    if (gsfJsonFileInfo.include_denormalized_fields) {
         cJSON_AddNumberToObject(json, "timestamp", epoch_time);
     }
     cJSON *body_json = cJSON_AddObjectToObject(json, "json_record");
-    cJSON_AddNumberToObject(body_json, "start_time", epoch_time);
+    cJSON_AddNumberToObject(body_json, "attitude_time", epoch_time);
     cJSON_AddNumberToObject(body_json, "num_measurements", attitude.num_measurements);
     cJSON_AddNumberToObject(body_json, "pitch", *attitude.pitch);
     cJSON_AddNumberToObject(body_json, "roll", *attitude.roll);
@@ -97,7 +142,29 @@ cJSON *gsfAttitude_toJson(struct t_gsfAttitude attitude, int include_denormalize
     return json;
 }
 
-cJSON *gsfSwathBathySummary_toJson(struct t_gsfSwathBathySummary summary, gsfJsonFile gsfJsonFileInfo) {
+
+static cJSON *gsfSwathBathySummary_flatten(struct t_gsfSwathBathySummary summary, gsfJsonFile gsfJsonFileInfo) {
+    cJSON *json = cJSON_CreateObject();   
+    cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_SWATH_BATHY_SUMMARY);
+
+    cJSON_AddStringToObject(json, "gsf_version", gsfJsonFileInfo.gsf_version);
+    cJSON_AddStringToObject(json, "file_name", gsfJsonFileInfo.file_name);
+    cJSON_AddNumberToObject(json, "latitude", summary.min_latitude);
+    cJSON_AddNumberToObject(json, "longitude", summary.min_longitude);
+    double timestamp = epoch_double(summary.start_time);
+    cJSON_AddNumberToObject(json, "timestamp", timestamp);
+    cJSON_AddNumberToObject(json, "start_time", timestamp);
+    cJSON_AddNumberToObject(json, "end_time", epoch_double(summary.end_time));
+    cJSON_AddNumberToObject(json, "min_latitude", summary.min_latitude);
+    cJSON_AddNumberToObject(json, "min_longitude", summary.min_longitude);
+    cJSON_AddNumberToObject(json, "max_latitude", summary.max_latitude);
+    cJSON_AddNumberToObject(json, "max_longitude", summary.max_longitude);
+    cJSON_AddNumberToObject(json, "min_depth", summary.min_depth);
+    cJSON_AddNumberToObject(json, "max_depth", summary.max_depth);
+    return json;
+}
+
+static cJSON *gsfSwathBathySummary_toJson(struct t_gsfSwathBathySummary summary, gsfJsonFile gsfJsonFileInfo) {
     cJSON *json = cJSON_CreateObject();   
     cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_SWATH_BATHY_SUMMARY);
 
@@ -618,6 +685,28 @@ static void gsfSensorSpecific_toJson(cJSON *json, int sensor_id, gsfSwathBathyPi
     }
 }
 
+static cJSON *gsfSingleBeamPing_flatten(struct t_gsfSingleBeamPing ping) {
+    cJSON *json = cJSON_CreateObject();
+    cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_SINGLE_BEAM_PING);
+    double timestamp = epoch_double(ping.ping_time);
+    cJSON_AddNumberToObject(json, "timestamp", timestamp);
+    cJSON_AddNumberToObject(json, "ping_time", timestamp);
+    cJSON_AddNumberToObject(json, "latitude", ping.latitude);
+    cJSON_AddNumberToObject(json, "longitude", ping.longitude);
+    cJSON_AddNumberToObject(json, "tide_corrector", ping.tide_corrector);
+    cJSON_AddNumberToObject(json, "depth_corrector", ping.depth_corrector);
+    cJSON_AddNumberToObject(json, "heading", ping.heading);
+    cJSON_AddNumberToObject(json, "pitch", ping.pitch);
+    cJSON_AddNumberToObject(json, "roll", ping.roll);
+    cJSON_AddNumberToObject(json, "heave", ping.heave);
+    cJSON_AddNumberToObject(json, "depth", ping.depth);
+    cJSON_AddNumberToObject(json, "sound_speed_correction", ping.sound_speed_correction);
+    cJSON_AddNumberToObject(json, "positioning_system_type", ping.positioning_system_type);
+    cJSON_AddNumberToObject(json, "sensor_id", ping.sensor_id);
+    gsfSBSensorSpecific_toJson(json,ping.sensor_data);
+    return json;
+}
+
 
 static cJSON *gsfSingleBeamPing_toJson(struct t_gsfSingleBeamPing ping) {
     cJSON *json = cJSON_CreateObject();
@@ -637,6 +726,68 @@ static cJSON *gsfSingleBeamPing_toJson(struct t_gsfSingleBeamPing ping) {
     cJSON_AddNumberToObject(body_json, "positioning_system_type", ping.positioning_system_type);
     cJSON_AddNumberToObject(body_json, "sensor_id", ping.sensor_id);
     gsfSBSensorSpecific_toJson(body_json, ping.sensor_data);
+    return json;
+}
+
+static cJSON *gsfSwathBathyPing_flatten(struct t_gsfSwathBathyPing ping, gsfJsonFile gsfJsonFileInfo) {
+    cJSON *json = cJSON_CreateObject();
+
+    cJSON_AddStringToObject(json, "gsf_version", gsfJsonFileInfo.gsf_version);
+    cJSON_AddStringToObject(json, "file_name", gsfJsonFileInfo.file_name);
+    double timestamp = epoch_double(ping.ping_time);
+    cJSON_AddNumberToObject(json, "timestamp", timestamp);
+    cJSON_AddNumberToObject(json, "ping_time", timestamp);
+    cJSON_AddNumberToObject(json, "latitude", ping.latitude);
+    cJSON_AddNumberToObject(json, "longitude", ping.longitude);
+    cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_SWATH_BATHYMETRY_PING);
+    cJSON_AddNumberToObject(json, "ping_time", epoch_double(ping.ping_time));
+    cJSON_AddNumberToObject(json, "latitude", ping.latitude);
+    cJSON_AddNumberToObject(json, "longitude", ping.longitude);
+    cJSON_AddNumberToObject(json, "height", ping.height);
+    cJSON_AddNumberToObject(json, "sep", ping.sep);
+    cJSON_AddNumberToObject(json, "number_beams", ping.number_beams);
+    cJSON_AddNumberToObject(json, "center_beam", ping.center_beam);
+    cJSON_AddNumberToObject(json, "ping_flags", ping.ping_flags);
+    cJSON_AddNumberToObject(json, "reserved", ping.reserved);
+    cJSON_AddNumberToObject(json, "tide_corrector", ping.tide_corrector);
+    cJSON_AddNumberToObject(json, "gps_tide_corrector", ping.gps_tide_corrector);
+    cJSON_AddNumberToObject(json, "depth_corrector", ping.depth_corrector);
+    cJSON_AddNumberToObject(json, "heading", ping.heading);
+    cJSON_AddNumberToObject(json, "pitch", ping.pitch);
+    cJSON_AddNumberToObject(json, "roll", ping.roll);
+    cJSON_AddNumberToObject(json, "heave", ping.heave);
+    cJSON_AddNumberToObject(json, "course", ping.course);
+    cJSON_AddNumberToObject(json, "speed", ping.speed);
+    add_double_array(json, "depth", ping.depth, ping.number_beams);
+    add_double_array(json, "nominal_depth", ping.nominal_depth, ping.number_beams);
+    add_double_array(json, "across_track", ping.across_track, ping.number_beams);
+    add_double_array(json, "travel_time", ping.travel_time, ping.number_beams);
+    add_double_array(json, "beam_angle", ping.beam_angle, ping.number_beams);
+    add_double_array(json, "mc_amplitude", ping.mc_amplitude, ping.number_beams);
+    add_double_array(json, "mr_amplitude", ping.mr_amplitude, ping.number_beams);
+    add_double_array(json, "echo_width", ping.echo_width, ping.number_beams);
+    add_double_array(json, "quality_factor", ping.quality_factor, ping.number_beams);
+    add_double_array(json, "receive_heave", ping.receive_heave, ping.number_beams);
+    add_double_array(json, "depth_error", ping.depth_error, ping.number_beams);
+    add_double_array(json, "across_track_error", ping.across_track, ping.number_beams);
+    add_double_array(json, "along_track_error", ping.along_track_error, ping.number_beams);
+    add_char_array(json, "quality_flags", ping.quality_flags, ping.number_beams);
+    add_char_array(json, "beam_flags", ping.beam_flags, ping.number_beams);
+    add_double_array(json, "signal_to_noise", ping.signal_to_noise, ping.number_beams);
+    add_double_array(json, "beam_angle_forward", ping.beam_angle_forward, ping.number_beams);
+    add_double_array(json, "vertical_error", ping.vertical_error, ping.number_beams);
+    add_double_array(json, "horizontal_error", ping.horizontal_error, ping.number_beams);
+    add_short_array(json, "sector_number", ping.sector_number, ping.number_beams);
+    add_short_array(json, "detection_info", ping.detection_info, ping.number_beams);
+    add_double_array(json, "incident_beam_adj", ping.incident_beam_adj, ping.number_beams);
+    add_short_array(json, "system_cleaning", ping.system_cleaning, ping.number_beams);
+    add_double_array(json, "doppler_corr", ping.doppler_corr, ping.number_beams);
+    add_double_array(json, "sonar_vert_uncert", ping.sonar_vert_uncert, ping.number_beams);
+    add_double_array(json, "sonar_horz_uncert", ping.sonar_horz_uncert, ping.number_beams);
+    add_double_array(json, "detection_window", ping.detection_window, ping.number_beams);
+    add_double_array(json, "mean_abs_coeff", ping.mean_abs_coeff, ping.number_beams);
+    cJSON_AddNumberToObject(json, "sensor_id", ping.sensor_id);
+    cJSON_AddStringToObject(json, "sensor_name", gsfGetSonarTextName(&ping));
     return json;
 }
 
@@ -710,19 +861,46 @@ char *gsfRecord_toJson(gsfDataID dataID, gsfRecords record, gsfJsonFile gsfJsonF
     cJSON *json;
     switch (dataID.recordID) {
         case GSF_RECORD_COMMENT:
-            json = gsfComment_toJson(record.comment, gsfJsonFileInfo);
+            if (gsfJsonFileInfo.flatten) {
+                json = gsfComment_flatten(record.comment, gsfJsonFileInfo);
+            } else {
+                json = gsfComment_toJson(record.comment, gsfJsonFileInfo);
+            }
             break;
         case GSF_RECORD_HISTORY:
-            json = gsfHistory_toJson(record.history, gsfJsonFileInfo);
+            if (gsfJsonFileInfo.flatten) {
+                json = gsfHistory_flatten(record.history, gsfJsonFileInfo);
+            } else {
+                json = gsfHistory_toJson(record.history, gsfJsonFileInfo);
+            }
             break;
         case GSF_RECORD_SWATH_BATHY_SUMMARY:
-            json =  gsfSwathBathySummary_toJson(record.summary, gsfJsonFileInfo);
+            if (gsfJsonFileInfo.flatten) {
+                json =  gsfSwathBathySummary_flatten(record.summary, gsfJsonFileInfo);
+            } else {
+                json =  gsfSwathBathySummary_toJson(record.summary, gsfJsonFileInfo);
+            }
             break;
         case GSF_RECORD_SWATH_BATHYMETRY_PING:
-            json = gsfSwathBathyPing_toJson(record.mb_ping, gsfJsonFileInfo);
+            if (gsfJsonFileInfo.flatten) {
+                json = gsfSwathBathyPing_flatten(record.mb_ping, gsfJsonFileInfo);
+            } else {
+                json = gsfSwathBathyPing_toJson(record.mb_ping, gsfJsonFileInfo);
+            }
+            break;
+        case GSF_RECORD_ATTITUDE:
+            if (gsfJsonFileInfo.flatten) {
+                json = gsfAttitude_flatten(record.attitude, gsfJsonFileInfo);
+            } else {
+                json = gsfAttitude_toJson(record.attitude, gsfJsonFileInfo);
+            }
             break;
         case GSF_RECORD_SINGLE_BEAM_PING:
-            json = gsfSingleBeamPing_toJson(record.sb_ping);
+            if (gsfJsonFileInfo.flatten) {
+                json = gsfSingleBeamPing_flatten(record.sb_ping);
+            } else {
+                json = gsfSingleBeamPing_toJson(record.sb_ping);
+            }
             break;
         default:
             return NULL;
@@ -730,11 +908,12 @@ char *gsfRecord_toJson(gsfDataID dataID, gsfRecords record, gsfJsonFile gsfJsonF
     return cJSON_PrintUnformatted(json); 
 }
 
-int gsfOpenForJson(char *filename, const int mode, int *handle, int buf_size, int include_denormlized_fields) {
+int gsfOpenForJson(char *filename, const int mode, int *handle, int buf_size, int include_denormlized_fields, int flatten) {
     int retvalue = gsfOpenBuffered(filename, mode, handle, buf_size);
     if (retvalue == 0) {
         memcpy(gsfJsonFiles[*handle].file_name, basename(filename), MAX_FILE_NAME_SIZE);
         gsfJsonFiles[*handle].include_denormalized_fields = include_denormlized_fields;
+        gsfJsonFiles[*handle].flatten = flatten;
         gsfJsonFiles[*handle].gsf_version_set = 0;
         strncpy(gsfJsonFiles[*handle].gsf_version, "NA", 3);
     }
