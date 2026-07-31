@@ -1,54 +1,99 @@
-# Overview
+# libgsf (GSF 3.11)
 
-Source code for the GSF parser (libgsf) for versions 3.09 and 3.10.  
-Download the latest [GSF Source Code](https://www.leidos.com/products/ocean-marine).
+Linux shared-library build of the [Generic Sensor Format](https://www.leidos.com/products/ocean-marine) library, customized for the [bluemvmt-gsf](https://github.com/Bluemvmt/bluemvmt-gsf) Python package.
 
-The original source from above supports Windows and Linux.  It is 
-important the purpose of this repository is to support deploying libgsf
-in Kubernetes/Docker envionments and only supports compiling in Linux
-environments.  That is, in fact, the main purpose for this repo.  If you
-need a Windows binary please follow the link above.
+This repository supports **GSF 3.11 only**. Upstream 3.11 is a maintenance release over 3.10 (unsigned `beam_angle_forward` codec restored; `start_range_samples` copied in `gsfCopyRecords`). Local JSON helpers (`gsfOpenForJson`, `gsfNextJsonRecord`, etc.) are ported on top of that tree so the Python `ctypes` bindings keep working. Older on-disk GSF files remain readable through the upstream compatibility paths.
 
+## Supported platforms
 
-# Compiling on Mac/Windows
+| Host | Target artifact |
+|------|-----------------|
+| Linux (native) | `dist/libgsf-$(uname -m)-03.11.so` |
+| Windows / macOS / Linux via Docker Buildx | `libgsf-x86_64-03.11.so` and `libgsf-aarch64-03.11.so` |
 
-Bluemvmt only cares about supporting Ubuntu.  To aid in compiling
-for for Ubuntu from Windows and mac this directory has a [Cloud Config](cloud-config.yaml)
-file to support provisioning a VM in which you can compile the
-source on any host platform.  To start up a vm using [Multipass](https://multipass.run/)
-you can use the following command from this directory:
+Only **Linux** shared objects are produced. Native Windows/macOS binaries are out of scope; use the upstream Leidos distribution if you need those.
 
-```commandShell
-multipass launch \
- --name libgsf-compile \
- --memory 2G \
- --cpus 2 \
- --disk 10G \
- --cloud-init cloud-config.yaml
+Artifact names match the consumer contract:
+
+```text
+src/bluemvmt_gsf/libgsf/lib/libgsf-{machine()}-03.11.so
 ```
 
-Once the VM has started you can mount this directory into the VM with 
-the following:
-```commandShell
-multipass mount $(pwd) libgsf-compile:/home/ubuntu/src -g 20:1000 -u 501:1000
+## Native Linux build
+
+Requires `gcc`, GNU Make, `binutils` (`nm`, `readelf`), and `file`.
+
+```sh
+make          # builds dist/libgsf-$(uname -m)-03.11.so
+make smoke    # verify ELF machine type and exported symbols
+make clean
 ```
 
-The right side of the colon for the -g and -u options are the user/group
-IDs of the VM.  The ids on the left are the host user/group IDs.  The latter
-will likely vary between host machines so run **id** (this is unix like 
-systems and will be different for Windows) to get the IDs for your particular
-host.
+## Docker Buildx (Windows / macOS / Linux)
 
-# Using Docker
+Produces both architectures in one command. Multi-platform output requires a Buildx builder using the `docker-container` driver (Docker Desktop includes this; plain Docker Engine defaults to the single-platform `docker` driver).
 
-The other option is to do your development in a Docker container.  To do so:
+One-time builder setup:
 
+```sh
+docker buildx create --name libgsf-multi --driver docker-container --use
+docker buildx inspect --bootstrap
 ```
-docker run \
-  -it \
-  --rm \
-  --name libgsf-dev \
-  -v $(pwd):/home/ubuntu/src \
-  vshefferbluemvmt/libgsf-dev \
-  /bin/bash
+
+On Linux hosts without Docker Desktop, also register QEMU user-mode emulation once:
+
+```sh
+docker run --privileged --rm tonistiigi/binfmt --install all
 ```
+
+Then build both architectures:
+
+```sh
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  --output type=local,dest=dist \
+  .
+```
+
+Output layout (multi-platform):
+
+```text
+dist/
+  linux_amd64/libgsf-x86_64-03.11.so
+  linux_arm64/libgsf-aarch64-03.11.so
+```
+
+Copy those files into `bluemvmt-gsf` at `src/bluemvmt_gsf/libgsf/lib/`.
+
+Single-architecture example (works with the default Docker driver):
+
+```sh
+docker buildx build \
+  --platform linux/amd64 \
+  --output type=local,dest=dist \
+  .
+```
+
+That writes `dist/libgsf-x86_64-03.11.so` directly.
+
+## Downstream follow-up (bluemvmt-gsf)
+
+Updating the Python package is a separate change:
+
+1. Add `_3_11 = "03.11"` to `GsfVersion` and default to it.
+2. Vendor both new `.so` files under `src/bluemvmt_gsf/libgsf/lib/`.
+3. Update the `gsfOpenForJson` ctypes call for the sixth `flattened_version` argument introduced by [libgsf PR #8](https://github.com/Bluemvmt/libgsf/pull/8).
+
+## Layout
+
+```text
+GSF_03-11/     Upstream 3.11 sources + local gsf_json.c/h + official PDFs
+cjson/         Bundled cJSON dependency used by the JSON helpers
+scripts/       Smoke-check helper used by `make smoke` and the Docker build
+Dockerfile     Multi-arch Linux builder
+Makefile       Single shared-object build
+```
+
+## Provenance
+
+Upstream source and documentation: [Leidos Ocean & Marine products](https://www.leidos.com/products/ocean-marine). See `GSF_03-11/gsf_version_03_11_change_summary.pdf` for the official 3.11 change requests.

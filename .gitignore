@@ -1,7 +1,6 @@
 *.o
 *.a
 *.so
-
-*/tests/bin/**
-# Leftover Multipasss files
+dist/
+# Leftover Multipass files
 .fuse*
