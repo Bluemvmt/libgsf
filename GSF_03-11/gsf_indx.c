@@ -1130,8 +1130,8 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
     int              j;
     int              err;
     int              id;
-    int              last_record_type;
-    int              last_record_number;
+    int              last_record_type=-1;
+    int              last_record_number=0;
     int              percent;
     int              old_percent;
     long long        last_index=0;
@@ -1310,7 +1310,8 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
      * record beyond the last record we have an index for.
      */
 
-    if (last_record_type != GSF_RECORD_SWATH_BATHYMETRY_PING)
+    if ((last_record_type != -1) &&
+        (last_record_type != GSF_RECORD_SWATH_BATHYMETRY_PING))
     {
         data_id.recordID = (unsigned int) last_record_type;
         data_id.record_number = last_record_number;
