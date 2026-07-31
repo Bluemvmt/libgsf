@@ -15,11 +15,12 @@ typedef struct t_gsfJsonFile {
     char file_name[MAX_FILE_NAME_SIZE];
     char gsf_version[GSF_VERSION_SIZE];
     int gsf_version_set;
-    int include_denormalized_fields;    
+    int include_denormalized_fields;
+    int flatten;    
 }
 gsfJsonFile;
 
-int gsfOpenForJson(char *filename, const int mode, int *handle, int buf_size, int include_denormalized_fields);
+int gsfOpenForJson(char *filename, const int mode, int *handle, int buf_size, int include_denormalized_fields, int flattened_version);
 int gsfCloseForJson(const int handle);
 char *gsfRecord_toJson(gsfDataID dataID, gsfRecords record, gsfJsonFile gsfJsonFileInfo);
 struct t_gsfJsonRecord gsfNextJsonRecord(int handle, int desired_record);
