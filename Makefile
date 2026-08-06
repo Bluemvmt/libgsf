@@ -6,7 +6,9 @@ TGT     = $(DIST)/lib$(PREFIX)-$(ARCH)-$(VERSION).so
 
 CC      = gcc
 RM      = rm -f
-CFLAGS  = -fPIC -Wall -O2 -D_STRICT_ANSI -D_LARGEFILE64_SOURCE \
+# Pin gnu11 so GCC 14+ (defaults to C23) does not emit __isoc23_* imports
+# that require GLIBC_2.38. Consumers (e.g. python:*-bookworm) ship glibc 2.36.
+CFLAGS  = -std=gnu11 -fPIC -Wall -O2 -D_STRICT_ANSI -D_LARGEFILE64_SOURCE \
           -I cjson -I GSF_03-11
 LDFLAGS = -shared -lm
 

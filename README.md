@@ -23,9 +23,14 @@ src/bluemvmt_gsf/libgsf/lib/libgsf-{machine()}-03.11.so
 
 Requires `gcc`, GNU Make, `binutils` (`nm`, `readelf`), and `file`.
 
+The Makefile pins `-std=gnu11`. Do not drop that flag: GCC 14+ defaults to
+C23 and will emit `__isoc23_*` imports that need `GLIBC_2.38`, which breaks
+Debian bookworm / Ubuntu 22.04 consumers (for example `python:*-bookworm`).
+Prefer the Docker Buildx path below when possible.
+
 ```sh
 make          # builds dist/libgsf-$(uname -m)-03.11.so
-make smoke    # verify ELF machine type and exported symbols
+make smoke    # verify ELF machine type, exports, and glibc max version
 make clean
 ```
 

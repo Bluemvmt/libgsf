@@ -68,4 +68,15 @@ if [[ "$missing" -ne 0 ]]; then
   exit 1
 fi
 
+# Keep the ABI portable to Debian bookworm / Ubuntu 22.04 (glibc 2.35–2.36).
+# Building with GCC 14+ in C23 mode pulls __isoc23_* @ GLIBC_2.38.
+echo "==> glibc symbol versions"
+glibc_versions="$(objdump -T "$SO" | grep -oE 'GLIBC_[0-9.]+' | sort -uV)"
+echo "$glibc_versions"
+if grep -qx 'GLIBC_2.38' <<<"$glibc_versions"; then
+  echo "error: $SO requires GLIBC_2.38 (too new for bookworm/Ubuntu 22.04)." >&2
+  echo "Rebuild with -std=gnu11 (see Makefile) or via the gcc:12-bookworm Docker image." >&2
+  exit 1
+fi
+
 echo "smoke check passed: $SO"
