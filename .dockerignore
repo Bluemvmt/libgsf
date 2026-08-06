@@ -1,0 +1,9 @@
+.git
+dist
+**/*.o
+**/*.so
+**/*.a
+**/*.pdf
+README.md
+.gitignore
+.gitattributes

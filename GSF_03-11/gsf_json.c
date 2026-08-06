@@ -1,7 +1,7 @@
 #include <libgen.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../cjson/cJSON.h"
+#include "cJSON.h"
 #include "gsf_json.h"
 #include "gsf.h"
 
