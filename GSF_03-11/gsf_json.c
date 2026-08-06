@@ -108,6 +108,40 @@ cJSON *gsfHistory_toJson(struct t_gsfHistory history, gsfJsonFile gsfJsonFileInf
     return json;
 }
 
+cJSON *gsfProcessingParameters_flatten(struct t_gsfProcessingParameters params, gsfJsonFile gsfJsonFileInfo) {
+    cJSON *json = cJSON_CreateObject();
+    cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_PROCESSING_PARAMETERS);
+    cJSON_AddStringToObject(json, "gsf_version", gsfJsonFileInfo.gsf_version);
+    cJSON_AddStringToObject(json, "file_name", gsfJsonFileInfo.file_name);
+    double timestamp = epoch_double(params.param_time);
+    cJSON_AddNumberToObject(json, "timestamp", timestamp);
+    cJSON_AddNumberToObject(json, "number_parameters", params.number_parameters);
+    cJSON *arr = cJSON_AddArrayToObject(json, "parameters");
+    for (int i = 0; i < params.number_parameters; i++) {
+        cJSON_AddItemToArray(arr, cJSON_CreateString(params.param[i]));
+    }
+    return json;
+}
+
+cJSON *gsfProcessingParameters_toJson(struct t_gsfProcessingParameters params, gsfJsonFile gsfJsonFileInfo) {
+    cJSON *json = cJSON_CreateObject();
+    cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_PROCESSING_PARAMETERS);
+    double epoch_time = epoch_double(params.param_time);
+    if (gsfJsonFileInfo.include_denormalized_fields) {
+        cJSON_AddStringToObject(json, "gsf_version", gsfJsonFileInfo.gsf_version);
+        cJSON_AddStringToObject(json, "file_name", gsfJsonFileInfo.file_name);
+        cJSON_AddNumberToObject(json, "timestamp", epoch_time);
+    }
+    cJSON *body_json = cJSON_AddObjectToObject(json, "json_record");
+    cJSON_AddNumberToObject(body_json, "param_time", epoch_time);
+    cJSON_AddNumberToObject(body_json, "number_parameters", params.number_parameters);
+    cJSON *arr = cJSON_AddArrayToObject(body_json, "parameters");
+    for (int i = 0; i < params.number_parameters; i++) {
+        cJSON_AddItemToArray(arr, cJSON_CreateString(params.param[i]));
+    }
+    return json;
+}
+
 static cJSON *gsfAttitude_flatten(struct t_gsfAttitude attitude, gsfJsonFile gsfJsonFileInfo) {
     cJSON *json = cJSON_CreateObject();
     cJSON_AddNumberToObject(json, "record_type", GSF_RECORD_ATTITUDE);
@@ -865,6 +899,13 @@ char *gsfRecord_toJson(gsfDataID dataID, gsfRecords record, gsfJsonFile gsfJsonF
                 json = gsfHistory_flatten(record.history, gsfJsonFileInfo);
             } else {
                 json = gsfHistory_toJson(record.history, gsfJsonFileInfo);
+            }
+            break;
+        case GSF_RECORD_PROCESSING_PARAMETERS:
+            if (gsfJsonFileInfo.flatten) {
+                json = gsfProcessingParameters_flatten(record.process_parameters, gsfJsonFileInfo);
+            } else {
+                json = gsfProcessingParameters_toJson(record.process_parameters, gsfJsonFileInfo);
             }
             break;
         case GSF_RECORD_SWATH_BATHY_SUMMARY:
